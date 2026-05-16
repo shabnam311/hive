@@ -185,7 +185,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
 
         {/* Download link */}
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-          <a
+          <a 
             href="https://ollama.com"
             target="_blank"
             rel="noopener noreferrer"
