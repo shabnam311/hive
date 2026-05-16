@@ -5,12 +5,6 @@ import { TopBar, HeroCopy, BottomDock, CornerWhisper } from "@/components/HiveOv
 
 export const Route = createFileRoute("/")({
   component: Index,
-      {
-        name: "description",
-        content:
-          "A locally-powered personal life OS. Dark academia on the outside, Gen-Z chaos on the inside, Ghibli soul everywhere.",
-      },
-    ],
 });
 
 function Index() {
