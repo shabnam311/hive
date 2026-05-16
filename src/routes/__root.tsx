@@ -1,4 +1,17 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
+import { OllamaProvider } from "@/components/OllamaContext";
+import { OllamaSetup } from "@/components/OllamaSetup";
+import { useOllama } from "@/components/OllamaContext";
+
+function AppShell() {
+  const { showSetup, retry, dismiss } = useOllama();
+  return (
+    <>
+      {showSetup && <OllamaSetup onRetry={retry} onDismiss={dismiss} />}
+      <Outlet />
+    </>
+  );
+}
 
 function NotFoundComponent() {
   return (
@@ -17,6 +30,10 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  component: () => <Outlet />,
+  component: () => (
+    <OllamaProvider>
+      <AppShell />
+    </OllamaProvider>
+  ),
   notFoundComponent: NotFoundComponent,
 });
