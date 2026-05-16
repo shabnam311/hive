@@ -1,0 +1,252 @@
+/* THE DEN — CSS Design System */
+/* Phase 6: Spring animations, exit transitions, glassmorphism, shimmer effects */
+
+:root {
+  --den-bg: rgba(6, 3, 1, 0.92);
+  --den-border: rgba(201, 168, 76, 0.3);
+  --den-border-hot: rgba(201, 168, 76, 0.7);
+  --den-amber: #c9a84c;
+  --den-parchment: #f4e4c1;
+  --den-text-dim: rgba(245, 236, 215, 0.45);
+  --den-panel-w: 680px;
+}
+
+/* ═══ PANELS ═══ */
+.den-panel {
+  position: fixed; z-index: 50;
+  background: var(--den-bg); border: 1px solid var(--den-border);
+  border-radius: 10px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 0 60px rgba(201,168,76,0.08), 0 24px 64px rgba(0,0,0,0.85), inset 0 1px 0 rgba(201,168,76,0.1);
+  font-family: 'Crimson Text', serif; color: var(--den-parchment);
+  max-height: calc(100vh - 120px); overflow-y: auto; overflow-x: hidden;
+  /* Exit transition */
+  transition: opacity 0.3s ease, transform 0.3s ease, backdrop-filter 0.3s ease;
+}
+.den-panel::-webkit-scrollbar { width: 3px; }
+.den-panel::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 2px; }
+
+.den-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 1rem 1.4rem; border-bottom: 1px solid var(--den-border);
+  position: sticky; top: 0; background: var(--den-bg); z-index: 2;
+}
+.den-panel-zone-label {
+  font-family: 'Cinzel', serif; font-size: 13px;
+  letter-spacing: 0.3em; color: var(--den-amber); text-transform: uppercase;
+}
+.den-panel-close {
+  background: none; border: none; color: var(--den-text-dim);
+  cursor: pointer; font-size: 18px; padding: 4px 8px; border-radius: 4px;
+  transition: all 0.2s ease;
+}
+.den-panel-close:hover { color: var(--den-amber); background: rgba(201,168,76,0.12); }
+.den-panel-body { padding: 1.2rem 1.4rem; }
+
+/* Panel positions — spring physics entrance animations */
+.den-panel--echo {
+  top: 80px; left: 20px; width: min(var(--den-panel-w), calc(100vw - 40px));
+  animation: den-sl 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.den-panel--reel {
+  bottom: 20px; left: 50%; transform: translateX(-50%);
+  width: min(var(--den-panel-w), calc(100vw - 40px));
+  animation: den-su 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.den-panel--folio {
+  top: 80px; right: 20px; width: min(var(--den-panel-w), calc(100vw - 40px));
+  animation: den-sr 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.den-panel--nook {
+  bottom: 20px; right: 20px; width: min(460px, calc(100vw - 40px));
+  animation: den-sur 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Spring overshoot entrance animations */
+@keyframes den-sl {
+  from { opacity: 0; transform: translateX(-50px) scale(0.95); backdrop-filter: blur(0px); }
+  to { opacity: 1; transform: translateX(0) scale(1); backdrop-filter: blur(20px); }
+}
+@keyframes den-su {
+  from { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.95); backdrop-filter: blur(0px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); backdrop-filter: blur(20px); }
+}
+@keyframes den-sr {
+  from { opacity: 0; transform: translateX(50px) scale(0.95); backdrop-filter: blur(0px); }
+  to { opacity: 1; transform: translateX(0) scale(1); backdrop-filter: blur(20px); }
+}
+@keyframes den-sur {
+  from { opacity: 0; transform: translateY(50px) scale(0.95); backdrop-filter: blur(0px); }
+  to { opacity: 1; transform: translateY(0) scale(1); backdrop-filter: blur(20px); }
+}
+
+/* ═══ INPUTS ═══ */
+.den-input {
+  background: rgba(20,10,4,0.85); border: 1px solid var(--den-border);
+  color: var(--den-parchment); font-family: 'Crimson Text', serif; font-size: 15px;
+  padding: 0.5rem 0.8rem; border-radius: 4px; outline: none; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.den-input:focus { border-color: var(--den-amber); box-shadow: 0 0 0 2px rgba(201,168,76,0.08); }
+.den-input::placeholder { color: var(--den-text-dim); font-style: italic; }
+
+.den-textarea {
+  background: rgba(20,10,4,0.85); border: 1px solid var(--den-border);
+  color: var(--den-parchment); font-family: 'Crimson Text', serif;
+  font-size: 16px; font-style: italic; line-height: 1.8;
+  padding: 0.6rem 0.8rem; border-radius: 4px; outline: none;
+  width: 100%; resize: vertical;
+}
+.den-textarea:focus { border-color: var(--den-amber); }
+.den-textarea::placeholder { color: var(--den-text-dim); }
+
+/* ═══ BUTTONS ═══ */
+.den-btn {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; background: rgba(201,168,76,0.12);
+  border: 1px solid var(--den-border); color: var(--den-amber);
+  padding: 6px 14px; border-radius: 4px; cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); white-space: nowrap;
+}
+.den-btn:hover { background: rgba(201,168,76,0.28); border-color: var(--den-amber); transform: translateY(-1px); }
+.den-btn:active { transform: translateY(0) scale(0.97); }
+.den-btn--danger { border-color: rgba(139,37,0,0.4); color: rgba(245,236,215,0.5); background: rgba(139,37,0,0.1); }
+.den-btn--danger:hover { border-color: rgba(139,37,0,0.7); color: #ff8060; }
+
+/* ═══ TABS ═══ */
+.den-tabs { display: flex; gap: 4px; margin-bottom: 1rem; }
+.den-tab {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; background: none; border: none;
+  color: var(--den-text-dim); padding: 6px 12px; cursor: pointer;
+  border-bottom: 1px solid transparent; transition: all 0.25s;
+}
+.den-tab:hover { color: var(--den-parchment); }
+.den-tab--active { color: var(--den-amber); border-bottom-color: var(--den-amber); }
+
+/* ═══ CARDS ═══ */
+.den-card {
+  background: rgba(10,6,2,0.9); border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 6px; padding: 0.8rem; transition: all 0.25s ease;
+}
+.den-card:hover { border-color: rgba(201,168,76,0.35); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+
+/* ═══ STARS — with pop animation ═══ */
+.den-stars { display: flex; gap: 2px; }
+.den-star {
+  cursor: pointer; font-size: 18px; background: none; border: none; padding: 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.den-star:hover { transform: scale(1.3); }
+.den-star:active { animation: den-star-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.den-star--filled { color: var(--den-amber); }
+.den-star--empty { color: rgba(255,255,255,0.2); }
+
+@keyframes den-star-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+/* ═══ PROGRESS — with shimmer ═══ */
+.den-progress { width: 100%; height: 2px; background: rgba(201,168,76,0.15); border-radius: 1px; overflow: hidden; }
+.den-progress-fill {
+  height: 100%; background: var(--den-amber); border-radius: 1px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  background: linear-gradient(90deg, var(--den-amber) 0%, #e8c060 50%, var(--den-amber) 100%);
+  background-size: 200% 100%;
+  animation: den-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes den-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ═══ OTHER UTILITIES ═══ */
+.den-genre-tag { display: inline-block; font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid rgba(201,168,76,0.3); color: var(--den-text-dim); padding: 2px 8px; border-radius: 10px; }
+.den-quote { font-family: 'Crimson Text', serif; font-size: 17px; font-style: italic; color: var(--den-parchment); border-left: 2px solid rgba(201,168,76,0.5); padding-left: 12px; margin: 8px 0; line-height: 1.6; }
+.den-quote-attr { font-size: 12px; color: var(--den-text-dim); margin-top: 4px; }
+.den-divider { border: none; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.25), transparent); margin: 1rem 0; }
+.den-stats { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--den-text-dim); padding: 0.6rem 0; text-align: center; border-top: 1px solid rgba(201,168,76,0.1); margin-top: 1rem; }
+.den-grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+
+/* ═══ EMPTY STATES — with decorative styling ═══ */
+.den-empty { text-align: center; padding: 2rem 1rem; }
+.den-empty-text { font-family: 'Crimson Text', serif; font-size: 17px; font-style: italic; color: var(--den-text-dim); line-height: 1.8; }
+.den-empty-icon {
+  font-size: 48px; margin-bottom: 1.5rem; opacity: 0.2;
+  animation: den-float 4s ease-in-out infinite;
+}
+@keyframes den-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ═══ COVER IMAGES — skeleton loading ═══ */
+.den-cover-skeleton {
+  background: rgba(201,168,76,0.08);
+  border-radius: 4px;
+  animation: den-skeleton-pulse 1.5s ease-in-out infinite;
+}
+@keyframes den-skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.15; }
+}
+.den-cover-img {
+  animation: den-fade-in 0.4s ease both;
+  border-radius: 4px;
+}
+@keyframes den-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══ SUBNAV ═══ */
+.den-subnav {
+  position: fixed; top: 56px; left: 50%; transform: translateX(-50%); z-index: 40;
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  background: rgba(6,3,1,0.6); backdrop-filter: blur(12px); border-radius: 20px;
+  border: 1px solid rgba(201,168,76,0.1);
+}
+.den-subnav-item {
+  font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.3em;
+  text-transform: uppercase; background: none; border: none;
+  padding: 6px 12px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-bottom: 1px solid transparent; border-radius: 4px;
+}
+.den-subnav-item--inactive { color: rgba(244,228,193,0.5); }
+.den-subnav-item--inactive:hover { color: rgba(244,228,193,0.8); background: rgba(201,168,76,0.08); }
+.den-subnav-item--active {
+  color: var(--den-amber); border-bottom-color: var(--den-amber);
+  text-shadow: 0 0 12px rgba(201,168,76,0.4);
+  background: rgba(201,168,76,0.08);
+}
+
+/* ═══ FILM GRAIN OVERLAY ═══ */
+.den-film-grain {
+  position: fixed; inset: 0; z-index: 100; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  animation: den-grain 0.5s steps(4) infinite;
+}
+@keyframes den-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ═══ SCENE BLUR OVERLAY (when panel is open) ═══ */
+.den-scene-blur {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  background: rgba(6,3,1,0.15);
+  animation: den-blur-in 0.4s ease both;
+}
+@keyframes den-blur-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

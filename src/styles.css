@@ -1,0 +1,178 @@
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@source "../src";
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Cinzel", serif;
+  --font-body: "Crimson Text", serif;
+  --font-hand: "Dancing Script", cursive;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-midnight: var(--midnight);
+  --color-deepbrown: var(--deepbrown);
+  --color-amber: var(--amber);
+  --color-forest: var(--forest);
+  --color-parchment: var(--parchment);
+  --color-ember: var(--ember);
+  --color-moon: var(--moon);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* HIVE palette → oklch */
+  --midnight: oklch(0.22 0.07 265);
+  --deepbrown: oklch(0.28 0.06 55);
+  --amber: oklch(0.74 0.16 75);
+  --forest: oklch(0.45 0.08 145);
+  --parchment: oklch(0.94 0.04 85);
+  --ember: oklch(0.5 0.18 35);
+  --moon: oklch(0.85 0.02 250);
+
+  --background: var(--midnight);
+  --foreground: var(--parchment);
+  --card: oklch(0.26 0.05 265 / 60%);
+  --card-foreground: var(--parchment);
+  --popover: var(--midnight);
+  --popover-foreground: var(--parchment);
+  --primary: var(--amber);
+  --primary-foreground: oklch(0.18 0.05 60);
+  --secondary: var(--deepbrown);
+  --secondary-foreground: var(--parchment);
+  --muted: oklch(0.3 0.04 265);
+  --muted-foreground: oklch(0.78 0.03 80);
+  --accent: var(--amber);
+  --accent-foreground: oklch(0.18 0.05 60);
+  --destructive: var(--ember);
+  --destructive-foreground: var(--parchment);
+  --border: oklch(0.4 0.05 70 / 35%);
+  --input: oklch(0.3 0.04 265);
+  --ring: var(--amber);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body, #root { height: 100%; }
+  body {
+    background:
+      radial-gradient(ellipse at 20% 0%, oklch(0.3 0.08 265 / 0.7), transparent 60%),
+      radial-gradient(ellipse at 80% 100%, oklch(0.32 0.09 30 / 0.45), transparent 65%),
+      var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0.02em; }
+}
+
+@utility font-display { font-family: var(--font-display); }
+@utility font-hand { font-family: var(--font-hand); }
+@utility font-mono { font-family: var(--font-mono); }
+
+@utility glass-panel {
+  background: linear-gradient(135deg, oklch(0.24 0.05 265 / 0.55), oklch(0.2 0.04 60 / 0.4));
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid oklch(0.6 0.08 75 / 0.18);
+  box-shadow:
+    0 1px 0 oklch(0.95 0.05 80 / 0.05) inset,
+    0 20px 60px -20px oklch(0.05 0 0 / 0.6);
+}
+
+@utility text-glow-amber {
+  text-shadow:
+    0 0 12px oklch(0.74 0.16 75 / 0.55),
+    0 0 30px oklch(0.74 0.16 75 / 0.3);
+}
+
+@keyframes float-up {
+  0% { transform: translateY(20px) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-120px) scale(1); opacity: 0; }
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  45% { opacity: 0.85; filter: brightness(1.15); }
+  55% { opacity: 0.95; filter: brightness(0.92); }
+}
+@keyframes drift {
+  0% { transform: translateX(-10%); }
+  100% { transform: translateX(110%); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-flicker { animation: flicker 3.5s ease-in-out infinite; }
+@utility animate-twinkle { animation: twinkle 4s ease-in-out infinite; }
+@utility animate-fade-up { animation: fade-up 0.8s ease-out both; }
+
+/* Library backdrop ambience */
+@keyframes library-ember-rise {
+  0% { transform: translate3d(0, 110vh, 0) scale(0.6); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(20px, -10vh, 0) scale(1.1); opacity: 0; }
+}
+@keyframes library-flicker-pulse {
+  0%, 100% { opacity: 0.0; }
+  20% { opacity: 0.10; }
+  40% { opacity: 0.04; }
+  60% { opacity: 0.14; }
+  80% { opacity: 0.06; }
+}
+@keyframes library-fog-drift {
+  0% { transform: translateX(-5%); opacity: 0.25; }
+  50% { opacity: 0.45; }
+  100% { transform: translateX(5%); opacity: 0.25; }
+}
+
+.library-ember {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: oklch(0.85 0.18 70);
+  box-shadow: 0 0 8px oklch(0.74 0.16 75 / 0.9), 0 0 16px oklch(0.6 0.18 50 / 0.6);
+  animation: library-ember-rise linear infinite;
+}
+.library-flicker {
+  background: radial-gradient(ellipse at 50% 70%, oklch(0.74 0.16 75 / 0.35), transparent 60%);
+  animation: library-flicker-pulse 4s ease-in-out infinite;
+}
+.library-fog {
+  background: linear-gradient(180deg, oklch(0.55 0.06 250 / 0.25), transparent);
+  filter: blur(20px);
+  animation: library-fog-drift 18s ease-in-out infinite alternate;
+}
