@@ -126,6 +126,7 @@ async function callAI(
     for (const char of fallback) onChunk(char);
     return fallback;
   }
+}
 
 // ─── Sources Panel ────────────────────────────────────────────────────────────
 
@@ -354,7 +355,6 @@ function ChatPanel(props: {
     [streaming, subject, onUpdate, setActiveTab, ollamaEnabled, ollamaModel],
   );
 
-  // expose sendMessage to parent for quick actions
   sendRef.current = sendMessage;
 
   const CHIPS = [
@@ -395,9 +395,9 @@ function ChatPanel(props: {
               <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#8b1c1c] text-[8px] text-[#f4e4c1] shadow-md border border-[#5a0c0c]">{subject.flashcards.length}</span>
             )}
             {activeTab === t && (
-              <motion.div 
+              <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent" 
+                className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#c9a84c] to-transparent"
               />
             )}
           </button>
@@ -409,7 +409,7 @@ function ChatPanel(props: {
           <div className="messages-list relative z-10">
             {subject.chatHistory.length === 0 && !streaming && (
               <div className="chat-empty">
-                <motion.div 
+                <motion.div
                   className="owl-avatar text-5xl filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)]"
                   animate={{ y: [0, -8, 0] }}
                   transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
@@ -432,7 +432,7 @@ function ChatPanel(props: {
             {subject.chatHistory.map((m) => (
               <div key={m.id} className={`message ${m.role}`}>
                 {m.role === "assistant" && (
-                  <motion.span 
+                  <motion.span
                     className="msg-icon text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                     animate={{ rotate: [-2, 2, -2] }}
                     transition={{ repeat: Infinity, duration: 3 }}
@@ -453,7 +453,7 @@ function ChatPanel(props: {
             ))}
             {streaming && (
               <div className="message assistant">
-                <motion.span 
+                <motion.span
                   className="msg-icon text-xl filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 1 }}
@@ -696,11 +696,10 @@ function NotesTab({ notes, onChange }: { notes: string; onChange: (n: string) =>
 export function SubjectWorkspace({ subject, onUpdate, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<"chat" | "flashcards" | "quiz" | "notes">("chat");
   const sendRef = useRef<((msg: string) => void) | null>(null);
-  const [ollamaEnabled] = useState(true); // always on — Ollama is the only AI
+  const [ollamaEnabled] = useState(true);
   const [ollamaAvailable, setOllamaAvailable] = useState<boolean | null>(null);
   const [ollamaModel, setOllamaModel] = useState("");
 
-  // Auto-detect Ollama on mount using unified service
   useEffect(() => {
     checkOllamaHealth().then((healthy) => {
       setOllamaAvailable(healthy);
@@ -727,7 +726,6 @@ export function SubjectWorkspace({ subject, onUpdate, onClose }: Props) {
               <span className="text-[#c9a84c]/60 text-[10px]">⏳</span>
               <span className="text-[#f4e4c1]/60 font-mono text-[10px] pt-px">{subject.hoursStudied.toFixed(1)}h</span>
             </div>
-            {/* Ollama Toggle */}
             <button
               className="ollama-toggle"
               onClick={() => {}}
