@@ -6,7 +6,6 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export const Route = createFileRoute("/finance")({
   component: FinPage,
-  head: () => ({ meta: [{ title: "Finance · HIVE" }] }),
 });
 
 type Tx = {

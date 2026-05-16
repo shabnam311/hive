@@ -29,7 +29,6 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/realm")({
   component: RealmPage,
-  head: () => ({ meta: [{ title: "The Library · HIVE" }] }),
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────

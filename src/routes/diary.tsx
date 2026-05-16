@@ -17,7 +17,6 @@ import { RealmNav } from "@/components/RealmShell";
 
 export const Route = createFileRoute("/diary")({
   component: DiaryPage,
-  head: () => ({ meta: [{ title: "The Diary · HIVE" }] }),
 });
 
 type DiaryEntry = {

@@ -46,8 +46,8 @@ export function DenScene() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Delayed ready for intro animation
-    const t = setTimeout(() => setReady(true), 100);
+    // Short delay just for the CSS transition to kick in
+    const t = setTimeout(() => setReady(true), 50);
     return () => clearTimeout(t);
   }, []);
 
@@ -68,7 +68,7 @@ export function DenScene() {
         position: "absolute",
         inset: 0,
         opacity: ready ? 1 : 0,
-        transition: "opacity 1.5s ease-in",
+        transition: "opacity 0.8s ease-in",
       }}
     >
       {/* Warm dark background */}

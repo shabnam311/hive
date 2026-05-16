@@ -8,10 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/planner")({
   component: PlannerPage,
-  head: () => ({ meta: [{ title: "Day Planner · HIVE" }] }),
 });
 
-type Task = { id: string; title: string; done: boolean };
 type DayMap = Record<string, Task[]>; // key: YYYY-MM-DD
 
 const fmtKey = (d: Date) =>
@@ -166,7 +164,6 @@ function PlannerPage() {
       ...prev,
       [selected]: [
         ...(prev[selected] ?? []),
-        { id: crypto.randomUUID(), title: text, done: false },
       ],
     }));
     setDraft("");
