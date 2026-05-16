@@ -155,10 +155,13 @@ function SubjectGrid({
   return (
     <div className="flex flex-wrap gap-5 pl-2 pb-4 pt-4">
       {subjects.map((s) => (
-        <button
+        <div
           key={s.id}
+          role="button"
+          tabIndex={0}
           onClick={() => onOpen(s.id)}
-          className="group relative flex h-52 w-14 flex-col items-center rounded-sm border-t border-t-[#ffffff20] border-l border-r border-[#000] shadow-[10px_0_20px_rgba(0,0,0,0.6),inset_-2px_0_5px_rgba(0,0,0,0.5)] transition-all duration-300 hover:-translate-y-4 hover:shadow-[15px_15px_30px_rgba(0,0,0,0.8)]"
+          onKeyDown={(e) => e.key === "Enter" && onOpen(s.id)}
+          className="group relative flex h-52 w-14 flex-col items-center rounded-sm border-t border-t-[#ffffff20] border-l border-r border-[#000] shadow-[10px_0_20px_rgba(0,0,0,0.6),inset_-2px_0_5px_rgba(0,0,0,0.5)] transition-all duration-300 hover:-translate-y-4 hover:shadow-[15px_15px_30px_rgba(0,0,0,0.8)] cursor-pointer"
           style={{ background: `linear-gradient(90deg, ${s.color} 5%, #111 95%)` }}
         >
           {/* Top Ribs */}
@@ -185,7 +188,7 @@ function SubjectGrid({
           >
             <Trash2 size={12} className="text-[#f4e4c1]" />
           </button>
-        </button>
+        </div>
       ))}
     </div>
   );
