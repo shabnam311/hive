@@ -1,38 +1,53 @@
 {
   "appId": "com.hive.app",
   "productName": "HIVE",
-  "copyright": "Copyright © 2024 HIVE",
+  "copyright": "Copyright © 2025",
   "directories": {
     "output": "release",
-    "buildResources": "electron/assets"
+    "buildResources": "public"
   },
   "files": [
     "dist/**/*",
-    "electron/main.js",
-    "electron/preload.js",
+    "electron/**/*",
+    "public/icon.*",
+    "node_modules/**/*",
     "package.json"
   ],
+  "extraResources": [],
   "win": {
-    "target": [{ "target": "nsis", "arch": ["x64"] }],
-    "icon": "electron/assets/icon.ico"
-  },
-  "mac": {
-    "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
-    "icon": "electron/assets/icon.icns",
-    "category": "public.app-category.productivity"
-  },
-  "linux": {
-    "target": [{ "target": "AppImage", "arch": ["x64"] }],
-    "icon": "electron/assets/icon.png",
-    "category": "Utility"
+    "target": [
+      { "target": "nsis", "arch": ["x64"] }
+    ],
+    "icon": "public/icon.ico",
+    "requestedExecutionLevel": "asInvoker"
   },
   "nsis": {
     "oneClick": false,
+    "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "electron/assets/icon.ico",
-    "uninstallerIcon": "electron/assets/icon.ico",
     "createDesktopShortcut": true,
-    "createStartMenuShortcut": true
+    "createStartMenuShortcut": true,
+    "shortcutName": "HIVE"
+  },
+  "mac": {
+    "target": [
+      { "target": "dmg", "arch": ["x64", "arm64"] }
+    ],
+    "icon": "public/icon.icns",
+    "category": "public.app-category.productivity",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false
+  },
+  "dmg": {
+    "title": "Install HIVE",
+    "icon": "public/icon.icns"
+  },
+  "linux": {
+    "target": [
+      { "target": "AppImage", "arch": ["x64"] }
+    ],
+    "icon": "public/icon.png",
+    "category": "Utility"
   },
   "publish": null
 }

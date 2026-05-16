@@ -1,137 +1,123 @@
-const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_URL ?? "http://localhost:11434";
-const GENERATE_URL = `${OLLAMA_BASE_URL}/api/generate`;
-const CHAT_URL = `${OLLAMA_BASE_URL}/api/chat`;
-const TAGS_URL = `${OLLAMA_BASE_URL}/api/tags`;
-const FALLBACK_MODEL = import.meta.env.VITE_OLLAMA_DEFAULT_MODEL ?? "llama3";
+// src/services/ollama.ts
+// Single unified Ollama service — replaces all scattered localhost:11434 fetch calls
 
-export async function checkOllamaHealth(): Promise<boolean> {
-  try {
-    const res = await fetch(TAGS_URL, { method: "GET", signal: AbortSignal.timeout(3000) });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+const OLLAMA_BASE = "http://localhost:11434";
 
 export interface OllamaModel {
   name: string;
-  displayName: string;
-  sizeGB: number;
+  modified_at: string;
+  size: number;
 }
 
-export async function getAvailableModels(): Promise<OllamaModel[]> {
+export interface OllamaStatus {
+  running: boolean;
+  models: OllamaModel[];
+  selectedModel: string | null;
+}
+
+let _cachedStatus: OllamaStatus | null = null;
+let _selectedModel: string | null = null;
+
+// Check if Ollama is running and fetch available models
+export async function checkOllamaStatus(): Promise<OllamaStatus> {
   try {
-    const res = await fetch(TAGS_URL, { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.models ?? []).map((m: { name: string; size: number }) => ({
-      name: m.name,
-      displayName: m.name.split(":")[0],
-      sizeGB: Math.round((m.size / 1e9) * 10) / 10,
-    }));
-  } catch {
-    return [];
-  }
-}
-
-export async function getBestModel(): Promise<string> {
-  const saved = localStorage.getItem("hive:ollama:model");
-  if (saved) return saved;
-  const models = await getAvailableModels();
-  if (models.length > 0) return models[0].name;
-  return FALLBACK_MODEL;
-}
-
-export function saveModelPreference(modelName: string): void {
-  localStorage.setItem("hive:ollama:model", modelName);
-}
-
-export async function askOllama(prompt: string, model?: string): Promise<string> {
-  const modelToUse = model ?? (await getBestModel());
-  try {
-    const res = await fetch(GENERATE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: modelToUse,
-        prompt,
-        stream: false,
-        options: { temperature: 0.7, num_predict: 300 },
-      }),
-      signal: AbortSignal.timeout(30_000),
+    const res = await fetch(`${OLLAMA_BASE}/api/tags`, {
+      signal: AbortSignal.timeout(3000),
     });
-    if (!res.ok) return "";
+    if (!res.ok) throw new Error("not running");
     const data = await res.json();
-    return data.response?.trim() ?? "";
+    const models: OllamaModel[] = data.models ?? [];
+
+    // Pick a default model — prefer llama3 if present, else first available
+    if (!_selectedModel && models.length > 0) {
+      const preferred = models.find((m) => m.name.startsWith("llama3"));
+      _selectedModel = preferred?.name ?? models[0].name;
+    }
+
+    _cachedStatus = { running: true, models, selectedModel: _selectedModel };
+    return _cachedStatus;
   } catch {
-    return "";
+    _cachedStatus = { running: false, models: [], selectedModel: null };
+    return _cachedStatus;
   }
+}
+
+// Set which model to use (called from settings UI)
+export function setSelectedModel(modelName: string) {
+  _selectedModel = modelName;
+  if (_cachedStatus) _cachedStatus.selectedModel = modelName;
+}
+
+export function getSelectedModel(): string | null {
+  return _selectedModel;
 }
 
 export interface ChatMessage {
-  role: "system" | "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 }
 
-export async function chatWithOllama(
+// Stream a chat completion — yields text chunks
+export async function* streamChat(
   messages: ChatMessage[],
-  onChunk: (token: string) => void,
-  model?: string,
-): Promise<string> {
-  const modelToUse = model ?? (await getBestModel());
-  try {
-    const res = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: modelToUse, messages, stream: true }),
-      signal: AbortSignal.timeout(60_000),
-    });
-    if (!res.ok || !res.body) return "";
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let full = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = dec.decode(value);
-      for (const line of chunk.split("\n")) {
-        if (!line.trim()) continue;
-        try {
-          const j = JSON.parse(line);
-          const token: string = j.message?.content ?? "";
-          full += token;
-          onChunk(token);
-        } catch {}
+  systemPrompt?: string,
+  model?: string
+): AsyncGenerator<string> {
+  const resolvedModel = model ?? _selectedModel;
+  if (!resolvedModel) throw new Error("No Ollama model selected");
+
+  const payload = {
+    model: resolvedModel,
+    messages: systemPrompt
+      ? [{ role: "system", content: systemPrompt }, ...messages]
+      : messages,
+    stream: true,
+  };
+
+  const res = await fetch(`${OLLAMA_BASE}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) throw new Error(`Ollama error: ${res.status}`);
+  if (!res.body) throw new Error("No response body");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const lines = decoder.decode(value, { stream: true }).split("\n");
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const json = JSON.parse(line);
+        const chunk = json.message?.content;
+        if (chunk) yield chunk;
+      } catch {
+        // skip malformed line
       }
     }
-    return full;
-  } catch {
-    return "";
   }
 }
 
-export async function getMovieInspo(title: string, year: string, model?: string): Promise<string[]> {
-  const prompt = `Give exactly 3 fascinating, little-known insights about the film "${title}" (${year}). Format as bullet points starting with •. Max 2 sentences per bullet.`;
-  const raw = await askOllama(prompt, model);
-  if (!raw) return [];
-  return raw.split("\n").filter((l) => l.trim().startsWith("•")).map((l) => l.trim());
-}
-
-export async function getBookInspo(title: string, author: string, model?: string): Promise<string[]> {
-  const prompt = `Give exactly 3 fascinating, little-known insights about the book "${title}" by ${author}. Format as bullet points starting with •. Max 2 sentences per bullet.`;
-  const raw = await askOllama(prompt, model);
-  if (!raw) return [];
-  return raw.split("\n").filter((l) => l.trim().startsWith("•")).map((l) => l.trim());
-}
-
-export async function getProjectionistRecommendation(
-  watchlist: Array<{ title: string; year: string }>,
-  moodDesc: string,
-  model?: string,
+// Non-streaming single completion (for quick features)
+export async function complete(
+  prompt: string,
+  model?: string
 ): Promise<string> {
-  if (watchlist.length === 0) return "Your watchlist is empty.";
-  const listStr = watchlist.map((m) => `"${m.title}" (${m.year})`).join(", ");
-  const prompt = `Act as a cinematic 'Projectionist'. A user feels: "${moodDesc}". Their watchlist: ${listStr}. Choose ONE film and write a poetic 3-sentence recommendation.`;
-  const raw = await askOllama(prompt, model);
-  return raw || "The projector is jammed... (Make sure Ollama is running locally)";
+  const resolvedModel = model ?? _selectedModel;
+  if (!resolvedModel) throw new Error("No Ollama model selected");
+
+  const res = await fetch(`${OLLAMA_BASE}/api/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: resolvedModel, prompt, stream: false }),
+  });
+
+  if (!res.ok) throw new Error(`Ollama error: ${res.status}`);
+  const data = await res.json();
+  return data.response ?? "";
 }

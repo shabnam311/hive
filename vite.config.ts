@@ -1,21 +1,37 @@
+// vite.config.ts
+// Plain Vite config — no @lovable.dev wrapper.
+// SPA mode: TanStack Router (file-based), no SSR.
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import path from "path";
+import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 
 export default defineConfig({
   plugins: [
-    TanStackRouterVite({ routesDirectory: "./src/routes", generatedRouteTree: "./src/routeTree.gen.ts" }),
     react(),
-    tailwindcss(),
-    tsconfigPaths(),
+    TanStackRouterVite(), // auto-generates routeTree.gen.ts — do NOT commit that file
   ],
-  resolve: { alias: { "@": "/src" } },
-  server: { port: 5173, host: true },
-  build: { outDir: "dist", sourcemap: false },
-  optimizeDeps: {
-    exclude: ["hls.js", "three-stdlib"],
+
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
-  css: { devSourcemap: false },
+
+  // Electron needs files served from ./ not /
+  base: process.env.ELECTRON === "true" ? "./" : "/",
+
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      input: { main: path.resolve(__dirname, "index.html") },
+    },
+  },
+
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
 });
