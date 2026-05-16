@@ -1,58 +1,44 @@
-// db.ts — IndexedDB persistence layer for HIVE
-// Stores: subjects, semesters, timer, settings
-// Auto-migrates from localStorage on first load
-
 const DB_NAME = "hive-db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const STORES = {
   subjects: "subjects",
   semesters: "semesters",
   timer: "timer",
   settings: "settings",
+  diary: "diary",
+  finance: "finance",
+  planner: "planner",
 } as const;
 
 let dbInstance: IDBDatabase | null = null;
 
 function openDB(): Promise<IDBDatabase> {
   if (dbInstance) return Promise.resolve(dbInstance);
-
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
-
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains(STORES.subjects)) {
-        db.createObjectStore(STORES.subjects, { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains(STORES.semesters)) {
-        db.createObjectStore(STORES.semesters, { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains(STORES.timer)) {
-        db.createObjectStore(STORES.timer);
-      }
-      if (!db.objectStoreNames.contains(STORES.settings)) {
-        db.createObjectStore(STORES.settings);
-      }
+      Object.values(STORES).forEach((name) => {
+        if (!db.objectStoreNames.contains(name)) {
+          if (name === "subjects" || name === "semesters") {
+            db.createObjectStore(name, { keyPath: "id" });
+          } else {
+            db.createObjectStore(name);
+          }
+        }
+      });
     };
-
-    req.onsuccess = () => {
-      dbInstance = req.result;
-      resolve(dbInstance);
-    };
-
+    req.onsuccess = () => { dbInstance = req.result; resolve(dbInstance); };
     req.onerror = () => reject(req.error);
   });
 }
-
-// ─── Generic operations ───────────────────────────────────────────────────────
 
 async function getAll<T>(storeName: string): Promise<T[]> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
-    const store = tx.objectStore(storeName);
-    const req = store.getAll();
+    const req = tx.objectStore(storeName).getAll();
     req.onsuccess = () => resolve(req.result as T[]);
     req.onerror = () => reject(req.error);
   });
@@ -62,8 +48,9 @@ async function putItem<T>(storeName: string, item: T, key?: IDBValidKey): Promis
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const req = key !== undefined ? store.put(item, key) : store.put(item);
+    const req = key !== undefined
+      ? tx.objectStore(storeName).put(item, key)
+      : tx.objectStore(storeName).put(item);
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
@@ -74,7 +61,6 @@ async function putAll<T>(storeName: string, items: T[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
-    // Clear existing and write all
     store.clear();
     items.forEach((item) => store.put(item));
     tx.oncomplete = () => resolve();
@@ -86,8 +72,7 @@ async function deleteItem(storeName: string, key: IDBValidKey): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const req = store.delete(key);
+    const req = tx.objectStore(storeName).delete(key);
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
@@ -97,82 +82,107 @@ async function getValue<T>(storeName: string, key: IDBValidKey): Promise<T | und
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
-    const store = tx.objectStore(storeName);
-    const req = store.get(key);
+    const req = tx.objectStore(storeName).get(key);
     req.onsuccess = () => resolve(req.result as T | undefined);
     req.onerror = () => reject(req.error);
   });
 }
 
-// ─── Typed API ────────────────────────────────────────────────────────────────
-
 export const db = {
-  // Subjects
   subjects: {
     getAll: () => getAll<any>(STORES.subjects),
-    put: (subject: any) => putItem(STORES.subjects, subject),
-    putAll: (subjects: any[]) => putAll(STORES.subjects, subjects),
+    put: (item: any) => putItem(STORES.subjects, item),
+    putAll: (items: any[]) => putAll(STORES.subjects, items),
     delete: (id: string) => deleteItem(STORES.subjects, id),
   },
-
-  // Semesters (groups)
   semesters: {
     getAll: () => getAll<any>(STORES.semesters),
-    put: (semester: any) => putItem(STORES.semesters, semester),
-    putAll: (semesters: any[]) => putAll(STORES.semesters, semesters),
+    put: (item: any) => putItem(STORES.semesters, item),
+    putAll: (items: any[]) => putAll(STORES.semesters, items),
     delete: (id: string) => deleteItem(STORES.semesters, id),
   },
-
-  // Timer state (single record)
   timer: {
     get: () => getValue<any>(STORES.timer, "state"),
     put: (state: any) => putItem(STORES.timer, state, "state"),
   },
-
-  // Settings
   settings: {
     get: (key: string) => getValue<any>(STORES.settings, key),
     put: (key: string, value: any) => putItem(STORES.settings, value, key),
   },
+  diary: {
+    get: (date: string) => getValue<any>(STORES.diary, date),
+    put: (date: string, entry: any) => putItem(STORES.diary, entry, date),
+    getAll: () => getAll<any>(STORES.diary),
+    delete: (date: string) => deleteItem(STORES.diary, date),
+  },
+  finance: {
+    get: () => getValue<any>(STORES.finance, "data"),
+    put: (data: any) => putItem(STORES.finance, data, "data"),
+  },
+  planner: {
+    get: () => getValue<any>(STORES.planner, "tasks"),
+    put: (tasks: any) => putItem(STORES.planner, tasks, "tasks"),
+  },
 
-  // Migration from localStorage
+  async exportAll(): Promise<string> {
+    const [subjects, semesters, diary, finance, planner] = await Promise.all([
+      getAll(STORES.subjects),
+      getAll(STORES.semesters),
+      getAll(STORES.diary),
+      getValue(STORES.finance, "data"),
+      getValue(STORES.planner, "tasks"),
+    ]);
+    return JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      version: DB_VERSION,
+      subjects,
+      semesters,
+      diary,
+      finance,
+      planner,
+    }, null, 2);
+  },
+
   async migrateFromLocalStorage(): Promise<boolean> {
     try {
-      const migrated = await this.settings.get("migrated_v1");
+      const migrated = await this.settings.get("migrated_v2");
       if (migrated) return false;
 
-      // Migrate subjects
       const subjectsRaw = localStorage.getItem("hive.realm.v4");
       if (subjectsRaw) {
-        try {
-          const subjects = JSON.parse(subjectsRaw);
-          if (Array.isArray(subjects) && subjects.length > 0) {
-            await this.subjects.putAll(subjects);
-          }
-        } catch {}
+        try { const s = JSON.parse(subjectsRaw); if (Array.isArray(s)) await this.subjects.putAll(s); } catch {}
       }
-
-      // Migrate groups → semesters
       const groupsRaw = localStorage.getItem("hive.realm.groups");
       if (groupsRaw) {
+        try { const g = JSON.parse(groupsRaw); if (Array.isArray(g)) await this.semesters.putAll(g); } catch {}
+      }
+      const timerRaw = localStorage.getItem("hive.realm.timer");
+      if (timerRaw) {
+        try { await this.timer.put(JSON.parse(timerRaw)); } catch {}
+      }
+      const diaryRaw = localStorage.getItem("hive.diary.v1");
+      if (diaryRaw) {
         try {
-          const groups = JSON.parse(groupsRaw);
-          if (Array.isArray(groups) && groups.length > 0) {
-            await this.semesters.putAll(groups);
+          const entries = JSON.parse(diaryRaw);
+          for (const [date, entry] of Object.entries(entries)) {
+            await this.diary.put(date, entry);
           }
         } catch {}
       }
-
-      // Migrate timer
-      const timerRaw = localStorage.getItem("hive.realm.timer");
-      if (timerRaw) {
+      const finRaw = localStorage.getItem("hive.fin.tx");
+      if (finRaw) {
         try {
-          const timer = JSON.parse(timerRaw);
-          await this.timer.put(timer);
+          const tx = JSON.parse(finRaw);
+          const chai = JSON.parse(localStorage.getItem("hive.fin.chai") ?? "0");
+          await this.finance.put({ tx, chai });
         } catch {}
       }
+      const plannerRaw = localStorage.getItem("hive.planner.v2");
+      if (plannerRaw) {
+        try { await this.planner.put(JSON.parse(plannerRaw)); } catch {}
+      }
 
-      await this.settings.put("migrated_v1", true);
+      await this.settings.put("migrated_v2", true);
       return true;
     } catch (e) {
       console.warn("[HIVE DB] Migration failed:", e);
