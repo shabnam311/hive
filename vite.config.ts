@@ -1,16 +1,19 @@
 // vite.config.ts
-// Plain Vite config — no @lovable.dev wrapper.
-// SPA mode: TanStack Router (file-based), no SSR.
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
+// ✅ Correct package — @tanstack/router-plugin is what's actually in node_modules
+// The old import "@tanstack/router-vite-plugin" does NOT exist and crashes the dev server
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
   plugins: [
+    // TanStackRouterVite MUST come before react() — it generates routeTree.gen.ts
+    TanStackRouterVite({
+      routesDirectory: "./src/routes",
+      generatedRouteTree: "./src/routeTree.gen.ts",
+    }),
     react(),
-    TanStackRouterVite(), // auto-generates routeTree.gen.ts — do NOT commit that file
   ],
 
   resolve: {
@@ -19,15 +22,12 @@ export default defineConfig({
     },
   },
 
-  // Electron needs files served from ./ not /
+  // Electron needs relative paths (./) — web needs absolute (/)
   base: process.env.ELECTRON === "true" ? "./" : "/",
 
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    rollupOptions: {
-      input: { main: path.resolve(__dirname, "index.html") },
-    },
   },
 
   server: {
