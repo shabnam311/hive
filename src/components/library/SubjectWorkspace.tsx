@@ -2,23 +2,12 @@
 // NotebookLM-style AI tutor workspace.
 // Layout: Sources panel (left 28%) + AI Chat panel (right 72%)
 // Features: document upload, persistent chat memory, flashcards, quiz, notes
-// AI: structured for easy Ollama swap (just change the fetch URL + model)
-//
-// TO INTEGRATE OLLAMA later:
-//   Set USE_OLLAMA = true
-//   Change OLLAMA_MODEL to e.g. "llama3" or "mistral"
-//   The message format is already Ollama-compatible (role/content array)
+// AI: Ollama (local) — no API keys, no cloud, no internet required
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playSoftClick, playFlip, playSuccess } from "@/lib/sounds";
 import { motion } from "framer-motion";
-
-// ─── Config (swap for Ollama later) ──────────────────────────────────────────
-
-const USE_OLLAMA_DEFAULT = false;
-const OLLAMA_ENDPOINT = "http://localhost:11434/api/chat";
-const OLLAMA_MODEL = "llama3";
-const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
+import { chatWithOllama, checkOllamaHealth, getBestModel } from "@/lib/ollama";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -115,60 +104,22 @@ async function callAI(
   history: Message[],
   userMessage: string,
   onChunk: (token: string) => void,
-  useOllama: boolean = false,
-  modelName: string = OLLAMA_MODEL,
+  _useOllama: boolean = true,
+  modelName?: string,
 ): Promise<string> {
   const messages = [
-    ...history.slice(-38).map((m) => ({ role: m.role, content: m.content })),
+    { role: "system" as const, content: systemPrompt },
+    ...history.slice(-38).map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
     { role: "user" as const, content: userMessage },
   ];
 
-  if (useOllama) {
-    const res = await fetch(OLLAMA_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [{ role: "system", content: systemPrompt }, ...messages],
-        stream: true,
-      }),
-    });
-    const reader = res.body!.getReader();
-    const dec = new TextDecoder();
-    let full = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = dec.decode(value);
-      for (const line of chunk.split("\n")) {
-        if (!line.trim()) continue;
-        try {
-          const j = JSON.parse(line);
-          const token = j.message?.content ?? "";
-          full += token;
-          onChunk(token);
-        } catch {}
-      }
-    }
-    return full;
+  const result = await chatWithOllama(messages, onChunk, modelName);
+  if (!result) {
+    const fallback = "Ollama isn't running. Start it with `ollama serve` in your terminal, then try again.";
+    for (const char of fallback) onChunk(char);
+    return fallback;
   }
-
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
-      max_tokens: 1500,
-      system: systemPrompt,
-      messages,
-    }),
-  });
-  const data = await res.json();
-  const text: string = data.content?.[0]?.text ?? "Sorry, I couldn't respond.";
-  for (const char of text) {
-    onChunk(char);
-  }
-  return text;
+  return result;
 }
 
 // ─── Sources Panel ────────────────────────────────────────────────────────────
@@ -740,29 +691,16 @@ function NotesTab({ notes, onChange }: { notes: string; onChange: (n: string) =>
 export function SubjectWorkspace({ subject, onUpdate, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<"chat" | "flashcards" | "quiz" | "notes">("chat");
   const sendRef = useRef<((msg: string) => void) | null>(null);
-  const [ollamaEnabled, setOllamaEnabled] = useState(USE_OLLAMA_DEFAULT);
+  const [ollamaEnabled] = useState(true); // always on — Ollama is the only AI
   const [ollamaAvailable, setOllamaAvailable] = useState<boolean | null>(null);
-  const [ollamaModel, setOllamaModel] = useState(OLLAMA_MODEL);
+  const [ollamaModel, setOllamaModel] = useState("");
 
-  // Auto-detect Ollama on mount — fetch available models
+  // Auto-detect Ollama on mount using unified service
   useEffect(() => {
-    fetch("http://localhost:11434/api/tags", { method: "GET" })
-      .then((res) => {
-        if (!res.ok) throw new Error("not ok");
-        return res.json();
-      })
-      .then((data) => {
-        const models = data?.models ?? [];
-        if (models.length > 0) {
-          setOllamaAvailable(true);
-          setOllamaEnabled(true);
-          // Use first available model
-          setOllamaModel(models[0].name ?? OLLAMA_MODEL);
-        } else {
-          setOllamaAvailable(false);
-        }
-      })
-      .catch(() => setOllamaAvailable(false));
+    checkOllamaHealth().then((healthy) => {
+      setOllamaAvailable(healthy);
+      if (healthy) getBestModel().then((m) => setOllamaModel(m));
+    });
   }, []);
 
   const handleQuickAction = useCallback((msg: string) => {
@@ -787,28 +725,24 @@ export function SubjectWorkspace({ subject, onUpdate, onClose }: Props) {
             {/* Ollama Toggle */}
             <button
               className="ollama-toggle"
-              onClick={() => {
-                if (ollamaAvailable) setOllamaEnabled(!ollamaEnabled);
-              }}
+              onClick={() => {}}
               title={
                 ollamaAvailable === null
                   ? "Checking Ollama..."
                   : ollamaAvailable
-                    ? ollamaEnabled
-                      ? "Using Ollama (local)"
-                      : "Click to use Ollama"
-                    : "Ollama not detected"
+                    ? `Ollama running — ${ollamaModel.split(":")[0] || "detecting model..."}`
+                    : "Ollama not running — start with: ollama serve"
               }
             >
               <span
-                className={`ollama-dot ${ollamaAvailable && ollamaEnabled ? "active shadow-[0_0_12px_rgba(39,174,96,0.8)] animate-pulse" : ollamaAvailable ? "available" : ""}`}
+                className={`ollama-dot ${ollamaAvailable ? "active shadow-[0_0_12px_rgba(39,174,96,0.8)] animate-pulse" : ""}`}
               />
               <span className="ollama-label">
                 {ollamaAvailable === null
                   ? "..."
-                  : ollamaEnabled && ollamaAvailable
-                    ? ollamaModel.split(":")[0]
-                    : "AI"}
+                  : ollamaAvailable
+                    ? ollamaModel.split(":")[0] || "Ollama"
+                    : "AI offline"}
               </span>
             </button>
             <button className="ws-close" onClick={onClose}>
