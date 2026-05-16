@@ -12,15 +12,10 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   resolve: { alias: { "@": "/src" } },
-  server: {
-    port: 5173,
-    host: true,
-  },
+  server: { port: 5173, host: true },
   build: { outDir: "dist", sourcemap: false },
   optimizeDeps: {
     exclude: ["hls.js", "three-stdlib"],
   },
-  css: {
-    devSourcemap: false,
-  },
+  css: { devSourcemap: false },
 });

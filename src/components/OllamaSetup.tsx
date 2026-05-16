@@ -1,6 +1,3 @@
-// OllamaSetup.tsx — shown when Ollama is not running
-// Detects OS and shows appropriate install instructions
-
 import { useState, useEffect } from "react";
 
 type OS = "mac" | "windows" | "linux" | "unknown";
@@ -95,14 +92,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
       >
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              marginBottom: "0.75rem",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
             <span style={{ fontSize: "1.5rem" }}>🦙</span>
             <h2
               style={{
@@ -117,14 +107,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
               OLLAMA NOT DETECTED
             </h2>
           </div>
-          <p
-            style={{
-              color: "#a09070",
-              fontSize: "0.95rem",
-              lineHeight: 1.6,
-              margin: 0,
-            }}
-          >
+          <p style={{ color: "#a09070", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>
             HIVE uses Ollama to run AI entirely on your machine — no API keys, no cloud, no data
             leaving your device. Set it up in a few minutes.
           </p>
@@ -156,15 +139,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
         </div>
 
         {/* Steps */}
-        <ol
-          style={{
-            margin: "0 0 1.5rem 0",
-            padding: "0 0 0 1.2rem",
-            color: "#c0a878",
-            fontSize: "0.9rem",
-            lineHeight: 2,
-          }}
-        >
+        <ol style={{ margin: "0 0 1.5rem 0", padding: "0 0 0 1.2rem", color: "#c0a878", fontSize: "0.9rem", lineHeight: 2 }}>
           {steps.map((step, i) => (
             <li key={i} style={{ marginBottom: "0.2rem" }}>
               {step}
@@ -179,21 +154,14 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
             border: "1px solid #1a1005",
             borderRadius: "8px",
             padding: "0.85rem 1rem",
-            marginBottom: "2rem",
+            marginBottom: "1.5rem",
             display: "flex",
             alignItems: "center",
             gap: "1rem",
             justifyContent: "space-between",
           }}
         >
-          <code
-            style={{
-              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-              color: "#c9a84c",
-              fontSize: "0.82rem",
-              wordBreak: "break-all",
-            }}
-          >
+          <code style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", color: "#c9a84c", fontSize: "0.82rem", wordBreak: "break-all" }}>
             {command}
           </code>
           <button
@@ -217,7 +185,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
 
         {/* Download link */}
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-          
+          <a
             href="https://ollama.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -230,7 +198,7 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
               paddingBottom: "1px",
             }}
           >
-            → Download from ollama.com
+            Download from ollama.com
           </a>
         </div>
 
@@ -273,18 +241,8 @@ export function OllamaSetup({ onDismiss, onRetry }: OllamaSetupProps) {
           </button>
         </div>
 
-        <p
-          style={{
-            color: "#3a2a18",
-            fontSize: "0.75rem",
-            textAlign: "center",
-            marginTop: "1.5rem",
-            marginBottom: 0,
-            lineHeight: 1.5,
-          }}
-        >
-          AI features will be unavailable until Ollama is running. All other HIVE features work
-          normally.
+        <p style={{ color: "#3a2a18", fontSize: "0.75rem", textAlign: "center", marginTop: "1.5rem", marginBottom: 0, lineHeight: 1.5 }}>
+          AI features will be unavailable until Ollama is running. All other HIVE features work normally.
         </p>
       </div>
     </div>
