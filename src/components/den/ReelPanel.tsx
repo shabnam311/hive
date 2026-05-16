@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useDen, type Movie, type WatchedMovie } from "./DenContext";
 import { getMovieInspo } from "../../lib/ollama";
+import { useOllama } from "@/components/OllamaContext";
 import "./den.css";
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -42,6 +43,7 @@ export function ReelPanel() {
   const [markRating, setMarkRating] = useState(4);
   const [markNote, setMarkNote] = useState("");
 
+  const { selectedModel, status: ollamaStatus } = useOllama();
   const [inspoId, setInspoId] = useState<string | null>(null);
   const [inspoLoading, setInspoLoading] = useState(false);
   const [inspoData, setInspoData] = useState<Record<string, string[]>>({});

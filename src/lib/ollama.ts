@@ -110,16 +110,16 @@ export async function chatWithOllama(
   }
 }
 
-export async function getMovieInspo(title: string, year: string): Promise<string[]> {
+export async function getMovieInspo(title: string, year: string, model?: string): Promise<string[]> {
   const prompt = `Give exactly 3 fascinating, little-known insights about the film "${title}" (${year}). Format as bullet points starting with •. Max 2 sentences per bullet.`;
-  const raw = await askOllama(prompt);
+  const raw = await askOllama(prompt, model);
   if (!raw) return [];
   return raw.split("\n").filter((l) => l.trim().startsWith("•")).map((l) => l.trim());
 }
 
-export async function getBookInspo(title: string, author: string): Promise<string[]> {
+export async function getBookInspo(title: string, author: string, model?: string): Promise<string[]> {
   const prompt = `Give exactly 3 fascinating, little-known insights about the book "${title}" by ${author}. Format as bullet points starting with •. Max 2 sentences per bullet.`;
-  const raw = await askOllama(prompt);
+  const raw = await askOllama(prompt, model);
   if (!raw) return [];
   return raw.split("\n").filter((l) => l.trim().startsWith("•")).map((l) => l.trim());
 }
@@ -127,10 +127,11 @@ export async function getBookInspo(title: string, author: string): Promise<strin
 export async function getProjectionistRecommendation(
   watchlist: Array<{ title: string; year: string }>,
   moodDesc: string,
+  model?: string,
 ): Promise<string> {
   if (watchlist.length === 0) return "Your watchlist is empty.";
   const listStr = watchlist.map((m) => `"${m.title}" (${m.year})`).join(", ");
   const prompt = `Act as a cinematic 'Projectionist'. A user feels: "${moodDesc}". Their watchlist: ${listStr}. Choose ONE film and write a poetic 3-sentence recommendation.`;
-  const raw = await askOllama(prompt);
+  const raw = await askOllama(prompt, model);
   return raw || "The projector is jammed... (Make sure Ollama is running locally)";
 }

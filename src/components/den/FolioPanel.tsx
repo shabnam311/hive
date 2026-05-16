@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useDen, type Book } from "./DenContext";
 import { getBookInspo } from "../../lib/ollama";
+import { useOllama } from "@/components/OllamaContext";
 import "./den.css";
 
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -37,6 +38,7 @@ export function FolioPanel() {
   } = useDen();
 
   // Manual Entry Form
+  const { selectedModel, status: ollamaStatus } = useOllama();
   const [newTitle, setNewTitle] = useState("");
   const [newAuthor, setNewAuthor] = useState("");
   const [newImage, setNewImage] = useState<string | null>(null);
