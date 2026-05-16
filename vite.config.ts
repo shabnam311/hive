@@ -20,6 +20,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["hls.js", "three-stdlib"],
   },
-  // Silence missing source map warnings from three-stdlib
-  build: { outDir: "dist", sourcemap: false },
+  css: {
+    devSourcemap: false,
+  },
 });
