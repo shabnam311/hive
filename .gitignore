@@ -1,3 +1,10 @@
+# Generated files
+src/routeTree.gen.ts
+tsc_output.txt
+bun.lockb
+lovable.toml
+wrangler.jsonc
+
 # Logs
 logs
 *.log
