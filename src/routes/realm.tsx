@@ -196,8 +196,8 @@ function SubjectGrid({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 function RealmPage() {
-  const [subjects, setSubjects] = useDBList<Subject>("subjects", "hive.realm.v4");
-  const [semesters, setSemesters] = useDBList<Semester>("semesters", "hive.realm.groups");
+  const [subjects, setSubjects] = useDBList<Subject>("realm", "hive.realm.v4");
+  const [semesters, setSemesters] = useDBList<Semester>("library", "hive.realm.groups");
 
   const [fsOpen, setFsOpen] = useState(false);
   const [fsView, setFsView] = useState<{ kind: "root" } | { kind: "semester"; id: string }>({

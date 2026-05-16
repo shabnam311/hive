@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playSoftClick, playFlip, playSuccess } from "@/lib/sounds";
 import { motion } from "framer-motion";
-import { chatWithOllama, checkOllamaHealth, getBestModel } from "@/lib/ollama";
+import { streamChat, checkOllamaHealth, getBestModel } from "../../services/ollama";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,14 +113,19 @@ async function callAI(
     { role: "user" as const, content: userMessage },
   ];
 
-  const result = await chatWithOllama(messages, onChunk, modelName);
-  if (!result) {
+  try {
+    let full = "";
+    const stream = streamChat(messages, undefined, modelName);
+    for await (const token of stream) {
+      full += token;
+      onChunk(token);
+    }
+    return full;
+  } catch {
     const fallback = "Ollama isn't running. Start it with `ollama serve` in your terminal, then try again.";
     for (const char of fallback) onChunk(char);
     return fallback;
   }
-  return result;
-}
 
 // ─── Sources Panel ────────────────────────────────────────────────────────────
 

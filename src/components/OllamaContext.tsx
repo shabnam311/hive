@@ -1,15 +1,12 @@
-// OllamaContext.tsx
-// Global Ollama state: health, available models, selected model.
-// Checked once on app startup; surfaced to any component that needs AI.
-
+// src/components/OllamaContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import {
   checkOllamaHealth,
   getAvailableModels,
   getBestModel,
-  saveModelPreference,
+  setSelectedModel as saveModelPreference,
   type OllamaModel,
-} from "@/lib/ollama";
+} from "../services/ollama";
 
 type OllamaStatus = "checking" | "running" | "offline";
 
@@ -44,9 +41,7 @@ export function OllamaProvider({ children }: { children: ReactNode }) {
       setShowSetup(false);
     } else {
       setStatus("offline");
-      if (!hasChecked) {
-        setShowSetup(true);
-      }
+      if (!hasChecked) setShowSetup(true);
     }
     setHasChecked(true);
   };
@@ -55,11 +50,8 @@ export function OllamaProvider({ children }: { children: ReactNode }) {
     check();
     const interval = setInterval(async () => {
       const healthy = await checkOllamaHealth();
-      if (healthy && status !== "running") {
-        check();
-      } else if (!healthy && status === "running") {
-        setStatus("offline");
-      }
+      if (healthy && status !== "running") check();
+      else if (!healthy && status === "running") setStatus("offline");
     }, 30_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,17 +62,9 @@ export function OllamaProvider({ children }: { children: ReactNode }) {
     saveModelPreference(name);
   };
 
-  const retry = () => {
-    check();
-  };
-
-  const dismiss = () => {
-    setShowSetup(false);
-  };
-
   return (
     <OllamaContext.Provider
-      value={{ status, models, selectedModel, setSelectedModel, retry, dismiss, showSetup }}
+      value={{ status, models, selectedModel, setSelectedModel, retry: check, dismiss: () => setShowSetup(false), showSetup }}
     >
       {children}
     </OllamaContext.Provider>

@@ -1,7 +1,7 @@
 // FolioPanel.tsx — Book tracker with Open Library search + Ollama Inspo
 import { useState } from "react";
 import { useDen, type Book } from "./DenContext";
-import { getBookInspo } from "../../lib/ollama";
+import { getBookInspo } from "../../services/ollama";
 import { useOllama } from "@/components/OllamaContext";
 import "./den.css";
 
@@ -57,7 +57,7 @@ export function FolioPanel() {
     }
     setInspoId(b.id);
     setInspoLoading(true);
-    const insights = await getBookInspo(b.title, b.author);
+    const insights = await getBookInspo(b.title, b.author, ollamaStatus === "running" ? selectedModel : undefined);
     setInspoData((d) => ({
       ...d,
       [b.id]:

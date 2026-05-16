@@ -1,21 +1,13 @@
-// useDB.ts — React hook for IndexedDB-backed state
-// Drop-in replacement for useLocalStorage with IndexedDB persistence
-
+// use-db.ts — React hook for IndexedDB-backed state
 import { useCallback, useEffect, useRef, useState } from "react";
-import { db } from "@/lib/db";
+import { dbGetAll, dbPut, getSetting, setSetting, STORES } from "@/lib/db";
 
-type Store = "subjects" | "semesters";
+type StoreName = (typeof STORES)[keyof typeof STORES];
 
-/**
- * Hook for array-based stores (subjects, semesters).
- * Loads from IndexedDB on mount, persists every mutation.
- * Falls back to localStorage during initial load.
- */
 export function useDBList<T extends { id: string }>(
-  store: Store,
+  store: StoreName,
   localStorageKey: string,
 ): [T[], React.Dispatch<React.SetStateAction<T[]>>, boolean] {
-  // Initial state from localStorage for instant render
   const [items, setItemsRaw] = useState<T[]>(() => {
     try {
       const raw = localStorage.getItem(localStorageKey);
@@ -27,43 +19,30 @@ export function useDBList<T extends { id: string }>(
   const [loaded, setLoaded] = useState(false);
   const skipPersist = useRef(true);
 
-  // Load from IndexedDB on mount
   useEffect(() => {
     (async () => {
-      await db.migrateFromLocalStorage();
-      const storeApi = store === "subjects" ? db.subjects : db.semesters;
-      const data = await storeApi.getAll();
-      if (data.length > 0) {
-        setItemsRaw(data as T[]);
-      }
+      const data = await dbGetAll<T>(store);
+      if (data.length > 0) setItemsRaw(data as T[]);
       setLoaded(true);
       skipPersist.current = false;
     })();
   }, [store]);
 
-  // Persist to IndexedDB on changes (skip initial load)
   useEffect(() => {
     if (skipPersist.current) return;
-    const storeApi = store === "subjects" ? db.subjects : db.semesters;
-    storeApi.putAll(items).catch(console.warn);
-    // Also keep localStorage as fallback
+    items.forEach((item) => dbPut(store, item).catch(console.warn));
     localStorage.setItem(localStorageKey, JSON.stringify(items));
   }, [items, store, localStorageKey]);
 
   const setItems: React.Dispatch<React.SetStateAction<T[]>> = useCallback((action) => {
     setItemsRaw((prev) => {
-      const next = typeof action === "function" ? (action as (prev: T[]) => T[])(prev) : action;
-      return next;
+      return typeof action === "function" ? (action as (prev: T[]) => T[])(prev) : action;
     });
   }, []);
 
   return [items, setItems, loaded];
 }
 
-/**
- * Hook for single-value stores (timer state).
- * Loads from IndexedDB, falls back to localStorage.
- */
 export function useDBValue<T>(
   localStorageKey: string,
   defaultValue: T,
@@ -81,24 +60,22 @@ export function useDBValue<T>(
 
   useEffect(() => {
     (async () => {
-      await db.migrateFromLocalStorage();
-      const data = await db.timer.get();
-      if (data) setValueRaw(data as T);
+      const data = await getSetting<T>(localStorageKey);
+      if (data !== undefined) setValueRaw(data);
       setLoaded(true);
       skipPersist.current = false;
     })();
-  }, []);
+  }, [localStorageKey]);
 
   useEffect(() => {
     if (skipPersist.current) return;
-    db.timer.put(value).catch(console.warn);
+    setSetting(localStorageKey, value).catch(console.warn);
     localStorage.setItem(localStorageKey, JSON.stringify(value));
   }, [value, localStorageKey]);
 
   const setValue: React.Dispatch<React.SetStateAction<T>> = useCallback((action) => {
     setValueRaw((prev) => {
-      const next = typeof action === "function" ? (action as (prev: T) => T)(prev) : action;
-      return next;
+      return typeof action === "function" ? (action as (prev: T) => T)(prev) : action;
     });
   }, []);
 

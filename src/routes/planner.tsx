@@ -10,6 +10,12 @@ export const Route = createFileRoute("/planner")({
   component: PlannerPage,
 });
 
+interface Task {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
 type DayMap = Record<string, Task[]>; // key: YYYY-MM-DD
 
 const fmtKey = (d: Date) =>

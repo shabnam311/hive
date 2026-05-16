@@ -1,7 +1,7 @@
 // ReelPanel.tsx — Movie journal with TMDB search + Ollama Inspo
 import { useState } from "react";
 import { useDen, type Movie, type WatchedMovie } from "./DenContext";
-import { getMovieInspo } from "../../lib/ollama";
+import { getMovieInspo } from "../../services/ollama";
 import { useOllama } from "@/components/OllamaContext";
 import "./den.css";
 
@@ -97,7 +97,7 @@ export function ReelPanel() {
     }
     setInspoId(m.id);
     setInspoLoading(true);
-    const insights = await getMovieInspo(m.title, m.year);
+    const insights = await getMovieInspo(m.title, m.year, ollamaStatus === "running" ? selectedModel : undefined);
     setInspoData((d) => ({
       ...d,
       [m.id]:
