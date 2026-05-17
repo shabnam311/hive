@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DiaryScene } from "@/components/diary/DiaryScene";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useDBValue } from "@/hooks/use-db";
+import { exportAllData } from "@/lib/db";
 import { RealmNav } from "@/components/RealmShell";
 
 export const Route = createFileRoute("/diary")({
@@ -149,7 +150,7 @@ function FlipCounter({ value }: { value: number }) {
 
 function DiaryPage() {
   const today = new Date();
-  const [entries, setEntries] = useLocalStorage<DiaryData>("hive.diary.v1", {});
+  const [entries, setEntries] = useDBValue<DiaryData>("hive.diary.v1", {});
   const [selected, setSelected] = useState(fmtKey(today));
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -1148,6 +1149,40 @@ function DiaryPage() {
           </motion.div>
         </div>
       </motion.main>
+
+      <button
+        onClick={async () => {
+          const json = await exportAllData();
+          const blob = new Blob([json], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `hive-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        title="Export all HIVE data"
+        style={{
+          position: "fixed",
+          bottom: 72,
+          right: 24,
+          zIndex: 100,
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          background: "rgba(20,12,6,0.6)",
+          border: "1px solid rgba(201,168,76,0.2)",
+          display: "grid",
+          placeItems: "center",
+          color: "rgba(245,236,215,0.4)",
+          cursor: "pointer",
+          backdropFilter: "blur(8px)",
+          fontSize: "0.9rem",
+          transition: "all 0.3s",
+        }}
+      >
+        💾
+      </button>
 
       <button
         onClick={() => setAmbientSound(!ambientSound)}

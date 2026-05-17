@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { RealmShell, Panel } from "@/components/RealmShell";
 import { PlannerScene } from "@/components/realm-scenes";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useDBValue } from "@/hooks/use-db";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/planner")({
@@ -71,7 +71,7 @@ function Firefly() {
 
 function PlannerPage() {
   const today = new Date();
-  const [tasksByDay, setTasksByDay] = useLocalStorage<DayMap>("hive.planner.v2", {});
+  const [tasksByDay, setTasksByDay] = useDBValue<DayMap>("hive.planner.v2", {});
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selected, setSelected] = useState<string>(fmtKey(today));

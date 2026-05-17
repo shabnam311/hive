@@ -219,7 +219,7 @@ export function HiveScene() {
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       camera={{ position: [4, 2.6, 5.5], fov: 42 }}
       gl={{ antialias: true }}
     >

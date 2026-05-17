@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { RealmShell, Panel } from "@/components/RealmShell";
 import { FinanceScene } from "@/components/realm-scenes";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useDBValue } from "@/hooks/use-db";
 
 export const Route = createFileRoute("/finance")({
   component: FinPage,
@@ -38,9 +38,9 @@ function useAnimatedNumber(value: number, duration = 600) {
 }
 
 function FinPage() {
-  const [budget] = useLocalStorage("hive.fin.budget", 5000);
-  const [tx, setTx] = useLocalStorage<Tx[]>("hive.fin.tx", []);
-  const [chai, setChai] = useLocalStorage("hive.fin.chai", 0);
+  const [budget] = useDBValue("hive.fin.budget", 5000);
+  const [tx, setTx] = useDBValue<Tx[]>("hive.fin.tx", []);
+  const [chai, setChai] = useDBValue("hive.fin.chai", 0);
   const [draft, setDraft] = useState({ type: "out" as Tx["type"], amount: 0, cat: "", note: "" });
   const [pulse, setPulse] = useState(0);
 

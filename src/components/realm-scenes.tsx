@@ -238,7 +238,7 @@ function CanvasShell({
   fog?: boolean;
 }) {
   return (
-    <Canvas dpr={[1, 2]} camera={{ position: [3, 2.2, 5], fov: 45 }}>
+    <Canvas dpr={[1, 1.5]} camera={{ position: [3, 2.2, 5], fov: 45 }}>
       <color attach="background" args={[bg]} />
       {fog && <fog attach="fog" args={[bg, 5, 18]} />}
       <ambientLight intensity={0.3} color="#6a78b8" />

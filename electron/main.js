@@ -178,3 +178,12 @@ app.on("window-all-closed", () => {
 app.on("before-quit", () => {
   stopOllama();
 });
+
+// Register hive:// deep link protocol
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("hive", process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient("hive");
+}
