@@ -117,6 +117,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      webSecurity: false,
     },
     backgroundColor: "#1a1a18", // matches app dark bg — prevents white flash
     show: false, // show after ready-to-show
