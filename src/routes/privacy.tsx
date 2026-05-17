@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/privacy")({
+export const Route = createFileRoute("/privacy" as never)({
   component: Privacy,
 });
 
@@ -17,7 +17,7 @@ function Privacy() {
       padding: "2rem",
     }}>
       <div style={{ maxWidth: "600px", lineHeight: "1.8" }}>
-        <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Privacy Policy</h1>
+        <h1 style={{ fontSize: "2rem", marginBottom: "1rem", fontFamily: "Cinzel, serif" }}>Privacy Policy</h1>
         <p style={{ opacity: 0.8, marginBottom: "1rem" }}>
           HIVE is a local-first application. Everything stays on your device.
         </p>

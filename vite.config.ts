@@ -5,7 +5,6 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  base: "./",
   plugins: [
     TanStackRouterVite({ routesDirectory: "./src/routes", generatedRouteTree: "./src/routeTree.gen.ts" }),
     react(),
@@ -13,6 +12,7 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   resolve: { alias: { "@": "/src" } },
+  base: "./",
   server: { port: 5173, host: true },
   build: { outDir: "dist", sourcemap: false },
   optimizeDeps: {
