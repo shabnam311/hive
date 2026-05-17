@@ -12,7 +12,7 @@ function Index() {
     <main className="relative h-screen w-screen overflow-hidden bg-midnight">
       {/* 3D living scene */}
       <div className="absolute inset-0">
-        <Suspense fallback={null}>
+        <Suspense fallback={<div style={{position:"fixed",inset:0,background:"#0d0905",display:"flex",alignItems:"center",justifyContent:"center",color:"rgba(201,168,76,0.5)",fontFamily:"'Cinzel',serif",letterSpacing:"0.3em",fontSize:"0.8rem"}}>HIVE</div>}>
           <HiveScene />
         </Suspense>
       </div>

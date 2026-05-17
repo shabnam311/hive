@@ -109,7 +109,7 @@ export function RealmShell({
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0d0906]">
       <div className="absolute inset-0">
-        <Suspense fallback={null}>{scene}</Suspense>
+        <Suspense fallback={<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",background:"#0a0604",color:"rgba(201,168,76,0.4)",fontFamily:"'Cinzel',serif",fontSize:"0.75rem",letterSpacing:"0.2em"}}>LOADING...</div>}>{scene}</Suspense>
       </div>
 
       {/* Background gradients */}

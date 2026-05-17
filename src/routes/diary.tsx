@@ -327,7 +327,7 @@ function DiaryPage() {
         transition={{ duration: 2 }}
         style={{ position: "absolute", inset: 0 }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={<div style={{position:"fixed",inset:0,background:"#0d0905"}}/>}>
           <DiaryScene pulse={pulse} />
         </Suspense>
       </motion.div>
