@@ -201,6 +201,8 @@ function FinPage() {
             <div className="space-y-4">
               <input
                 type="number"
+                min="0.01"
+                step="0.01"
                 placeholder="amount"
                 value={draft.amount || ""}
                 onChange={(e) => setDraft({ ...draft, amount: Number(e.target.value) })}

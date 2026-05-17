@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#0d0905"/>
+  <circle cx="256" cy="224" r="180" fill="rgba(201,168,76,0.05)"/>
+  <polygon fill="rgba(201,168,76,0.15)" stroke="#c9a84c" stroke-width="1" points="256,76 296,99 296,145 256,168 216,145 216,99"/>
+  <polygon fill="rgba(201,168,76,0.15)" stroke="#c9a84c" stroke-width="1" points="336,122 376,145 376,191 336,214 296,191 296,145"/>
+  <polygon fill="rgba(201,168,76,0.1)" stroke="#c9a84c" stroke-width="0.7" opacity="0.5" points="336,214 376,237 376,283 336,306 296,283 296,237"/>
+  <polygon fill="rgba(201,168,76,0.15)" stroke="#c9a84c" stroke-width="1" points="176,122 216,145 216,191 176,214 136,191 136,145"/>
+  <polygon fill="rgba(201,168,76,0.1)" stroke="#c9a84c" stroke-width="0.7" opacity="0.5" points="176,214 216,237 216,283 176,306 136,283 136,237"/>
+  <polygon fill="none" stroke="#c9a84c" stroke-width="0.7" opacity="0.5" points="256,260 296,283 296,329 256,352 216,329 216,283"/>
+  <polygon fill="none" stroke="#c9a84c" stroke-width="2.5" points="256,99 316,133 316,201 256,235 196,201 196,133"/>
+  <polygon fill="#1a1005" stroke="#8b6914" stroke-width="1" points="256,104 311,136.5 311,197.5 256,230 201,197.5 201,136.5"/>
+  <line x1="256" y1="104" x2="256" y2="230" stroke="#c9a84c" stroke-width="0.7" opacity="0.3"/>
+  <line x1="201" y1="136.5" x2="311" y2="197.5" stroke="#c9a84c" stroke-width="0.7" opacity="0.3"/>
+  <line x1="311" y1="136.5" x2="201" y2="197.5" stroke="#c9a84c" stroke-width="0.7" opacity="0.3"/>
+  <polygon fill="#c9a84c" opacity="0.9" points="256,148 276,159 276,181 256,192 236,181 236,159"/>
+  <circle cx="256" cy="170" r="8" fill="#0d0905"/>
+  <circle cx="256" cy="170" r="4" fill="#c9a84c"/>
+  <circle cx="256" cy="104" r="4" fill="#c9a84c"/>
+  <circle cx="311" cy="136.5" r="4" fill="#c9a84c"/>
+  <circle cx="311" cy="197.5" r="4" fill="#c9a84c"/>
+  <circle cx="256" cy="230" r="4" fill="#c9a84c"/>
+  <circle cx="201" cy="197.5" r="4" fill="#c9a84c"/>
+  <circle cx="201" cy="136.5" r="4" fill="#c9a84c"/>
+  <text x="256" y="320" text-anchor="middle" font-family="Georgia,serif" font-size="88" font-weight="700" fill="#c9a84c" letter-spacing="18">HIVE</text>
+  <text x="256" y="360" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="400" fill="#8b6914" letter-spacing="8">SANCTUARY</text>
+</svg>

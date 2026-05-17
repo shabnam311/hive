@@ -487,7 +487,7 @@ function PlannerPage() {
                                 t.done ? "text-parchment/30" : "text-parchment/90"
                               }`}
                             >
-                              {t.title}
+                              {t.text}
                             </span>
                             {t.done && <QuillStrikethrough />}
                           </div>
