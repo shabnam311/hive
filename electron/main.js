@@ -1,107 +1,57 @@
-// electron/main.js
-// Electron main process — starts the app window and manages Ollama as a child process.
-
-const { app, BrowserWindow, shell, ipcMain } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, dialog } = require("electron");
 const path = require("path");
-const { spawn, execFile } = require("child_process");
+const { spawn } = require("child_process");
 const fs = require("fs");
+const http = require("http");
 
 const isDev = !app.isPackaged;
-const OLLAMA_PORT = 11434;
-
 let mainWindow = null;
 let ollamaProcess = null;
 
-// ─── Ollama management ──────────────────────────────────────────────────────
-
 function getOllamaPath() {
   if (process.platform === "win32") {
-    // Common install locations on Windows
     const candidates = [
       path.join(process.env.LOCALAPPDATA || "", "Programs", "Ollama", "ollama.exe"),
       path.join(process.env.ProgramFiles || "", "Ollama", "ollama.exe"),
-      "ollama.exe", // on PATH
     ];
-    return candidates.find((p) => {
-      try { return fs.existsSync(p); } catch { return false; }
-    }) ?? "ollama";
+    return candidates.find((p) => { try { return fs.existsSync(p); } catch { return false; } }) ?? "ollama";
   }
-
   if (process.platform === "darwin") {
-    const candidates = [
-      "/usr/local/bin/ollama",
-      "/opt/homebrew/bin/ollama", // Apple Silicon homebrew
-      path.join(process.env.HOME || "", ".ollama", "ollama"),
-    ];
-    return candidates.find((p) => {
-      try { return fs.existsSync(p); } catch { return false; }
-    }) ?? "ollama";
+    return ["/usr/local/bin/ollama", "/opt/homebrew/bin/ollama"]
+      .find((p) => fs.existsSync(p)) ?? "ollama";
   }
-
-  // Linux
   return "/usr/local/bin/ollama";
 }
 
-async function isOllamaRunning() {
-  try {
-    const { default: fetch } = await import("node-fetch").catch(() => ({
-      default: global.fetch,
-    }));
-    const fn = fetch ?? global.fetch;
-    const res = await fn(`http://localhost:${OLLAMA_PORT}/api/tags`, {
-      signal: AbortSignal.timeout(2000),
+function isOllamaRunning() {
+  return new Promise((resolve) => {
+    const req = http.get("http://localhost:11434/api/tags", (res) => {
+      resolve(res.statusCode === 200);
     });
-    return res.ok;
-  } catch {
-    return false;
-  }
+    req.on("error", () => resolve(false));
+    req.setTimeout(2000, () => { req.destroy(); resolve(false); });
+  });
 }
 
 async function startOllama() {
-  if (await isOllamaRunning()) {
-    console.log("[Ollama] Already running");
-    return;
-  }
-
+  if (await isOllamaRunning()) return;
   const ollamaPath = getOllamaPath();
-  console.log(`[Ollama] Starting from: ${ollamaPath}`);
-
   ollamaProcess = spawn(ollamaPath, ["serve"], {
     detached: false,
     stdio: "ignore",
-    env: { ...process.env, OLLAMA_HOST: `127.0.0.1:${OLLAMA_PORT}` },
+    windowsHide: true,
   });
-
-  ollamaProcess.on("error", (err) => {
-    console.error("[Ollama] Failed to start:", err.message);
-    ollamaProcess = null;
-  });
-
-  ollamaProcess.on("exit", (code) => {
-    console.log(`[Ollama] Exited with code ${code}`);
-    ollamaProcess = null;
-  });
-
-  // Wait up to 8s for Ollama to be ready
+  ollamaProcess.on("error", () => { ollamaProcess = null; });
+  ollamaProcess.on("exit", () => { ollamaProcess = null; });
   for (let i = 0; i < 16; i++) {
     await new Promise((r) => setTimeout(r, 500));
-    if (await isOllamaRunning()) {
-      console.log("[Ollama] Ready");
-      return;
-    }
+    if (await isOllamaRunning()) return;
   }
-
-  console.warn("[Ollama] Timed out waiting for startup");
 }
 
 function stopOllama() {
-  if (ollamaProcess) {
-    ollamaProcess.kill();
-    ollamaProcess = null;
-  }
+  if (ollamaProcess) { try { ollamaProcess.kill(); } catch {} ollamaProcess = null; }
 }
-
-// ─── Window ─────────────────────────────────────────────────────────────────
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -110,8 +60,8 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: "HIVE",
-    // icon set per platform below
-    icon: path.join(__dirname, "..", "public", "icon.png"),
+    backgroundColor: "#0d0903",
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -119,53 +69,59 @@ function createWindow() {
       sandbox: false,
       webSecurity: false,
     },
-    backgroundColor: "#1a1a18", // matches app dark bg — prevents white flash
-    show: false, // show after ready-to-show
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
   });
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173");
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(app.getAppPath(), "dist", "index.html"));
+    // CRITICAL: use loadFile, not loadURL with file://
+    // loadFile correctly handles relative asset paths from the dist folder
+    const indexPath = path.join(app.getAppPath(), "dist", "index.html");
+    mainWindow.loadFile(indexPath);
   }
 
-  mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
+  mainWindow.once("ready-to-show", () => { mainWindow.show(); });
+
+  mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
+    console.error("[HIVE] Load failed:", code, desc, url);
+    if (!isDev) {
+      setTimeout(() => {
+        const indexPath = path.join(app.getAppPath(), "dist", "index.html");
+        mainWindow && mainWindow.loadFile(indexPath);
+      }, 1000);
+    }
   });
 
-  // Open external links in the system browser, not inside Electron
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
   });
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
+  mainWindow.on("closed", () => { mainWindow = null; });
 }
 
-// ─── IPC handlers ────────────────────────────────────────────────────────────
-
-// Renderer can ask "is Ollama running?"
-ipcMain.handle("ollama:status", async () => {
-  return isOllamaRunning();
-});
-
-// Renderer can request Ollama restart
+ipcMain.handle("ollama:status", () => isOllamaRunning());
 ipcMain.handle("ollama:restart", async () => {
   stopOllama();
   await startOllama();
   return isOllamaRunning();
 });
-
-// ─── App lifecycle ────────────────────────────────────────────────────────────
+ipcMain.handle("app:export-data", async (_, jsonString) => {
+  const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+    title: "Export HIVE Data",
+    defaultPath: `hive-backup-${new Date().toISOString().slice(0, 10)}.json`,
+    filters: [{ name: "JSON", extensions: ["json"] }],
+  });
+  if (canceled || !filePath) return false;
+  fs.writeFileSync(filePath, jsonString, "utf8");
+  return true;
+});
+ipcMain.handle("app:version", () => app.getVersion());
 
 app.whenReady().then(async () => {
-  await startOllama();
+  startOllama().catch(() => {});
   createWindow();
-
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
@@ -175,16 +131,4 @@ app.on("window-all-closed", () => {
   stopOllama();
   if (process.platform !== "darwin") app.quit();
 });
-
-app.on("before-quit", () => {
-  stopOllama();
-});
-
-// Register hive:// deep link protocol
-if (process.defaultApp) {
-  if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("hive", process.execPath, [path.resolve(process.argv[1])]);
-  }
-} else {
-  app.setAsDefaultProtocolClient("hive");
-}
+app.on("before-quit", () => stopOllama());
