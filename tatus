@@ -1,5 +1,0 @@
-[33mf92cc86[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: hash history, loadFile, electron-builder config
-[33m9fbc39f[m fix: use hash history in Electron for file:// protocol routing
-[33m196e6d7[m fix: use app.getAppPath() for Electron file loading
-[33md8250ca[m fix: set vite base to ./ for Electron local file loading
-[33m968bc2b[m fix: allow local file loading in Electron (webSecurity: false)
