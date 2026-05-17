@@ -1,33 +1,21 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
-import { OllamaProvider } from "@/components/OllamaContext";
+import { OllamaProvider, useOllama } from "@/components/OllamaContext";
 import { OllamaSetup } from "@/components/OllamaSetup";
-import { useOllama } from "@/components/OllamaContext";
-import { DenProvider } from "@/components/den/DenContext";
-import { useDen } from "@/components/den/DenContext";
+import { DenProvider, useDen } from "@/components/den/DenContext";
 
 function MiniPlayer() {
   const { spotifyPlaylistUrl } = useDen();
   if (!spotifyPlaylistUrl) return null;
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 16,
-        right: 16,
-        zIndex: 9000,
-        width: 320,
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
-        border: "1px solid rgba(201,168,76,0.2)",
-        background: "#000",
-      }}
-    >
+    <div style={{
+      position: "fixed", bottom: 16, right: 16, zIndex: 9000,
+      width: 320, borderRadius: "12px", overflow: "hidden",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+      border: "1px solid rgba(201,168,76,0.2)", background: "#000",
+    }}>
       <iframe
         src={spotifyPlaylistUrl}
-        width="320"
-        height="80"
-        frameBorder="0"
+        width="320" height="80" frameBorder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
         style={{ display: "block" }}
       />

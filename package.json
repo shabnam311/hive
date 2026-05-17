@@ -4,12 +4,13 @@
   "version": "1.0.0",
   "description": "HIVE — your personal local-first workspace",
   "main": "electron/main.js",
-  "scripts": {
+"scripts": {
   "dev": "vite",
   "build": "vite build",
   "preview": "vite preview",
-  "electron:dev": "concurrently \"vite --mode electron\" \"wait-on http://localhost:5173 && electron .\"",
+  "build:web": "vite build",
   "build:electron": "vite build --mode electron",
+  "electron:dev": "concurrently \"vite --mode electron\" \"wait-on http://localhost:5173 && electron .\"",
   "electron:build": "npm run build:electron && electron-builder",
   "electron:build:win": "npm run build:electron && electron-builder --win",
   "electron:build:mac": "npm run build:electron && electron-builder --mac",
