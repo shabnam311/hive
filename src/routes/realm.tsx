@@ -430,7 +430,7 @@ function RealmPage() {
                 transition={{ delay: 1.2, duration: 0.8 }}
                 className="font-hand text-xs text-[#f4e4c1]/35 italic"
               >
-                click the desk or here
+                click  here
               </motion.span>
               {/* Ambient glow hover */}
               <div
