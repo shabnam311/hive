@@ -4,7 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === "electron" ? "./" : "/hive/",
   plugins: [
     TanStackRouterVite({ routesDirectory: "./src/routes", generatedRouteTree: "./src/routeTree.gen.ts" }),
     react(),
@@ -12,13 +13,8 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   resolve: { alias: { "@": "/src" } },
-  base: "/hive/",
   server: { port: 5173, host: true },
   build: { outDir: "dist", sourcemap: false },
-  optimizeDeps: {
-    exclude: ["hls.js", "three-stdlib"],
-  },
-  css: {
-    devSourcemap: false,
-  },
-});
+  optimizeDeps: { exclude: ["hls.js", "three-stdlib"] },
+  css: { devSourcemap: false },
+}));

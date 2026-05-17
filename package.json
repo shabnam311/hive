@@ -5,15 +5,16 @@
   "description": "HIVE — your personal local-first workspace",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run build && electron-builder",
-    "electron:build:win": "npm run build && electron-builder --win",
-    "electron:build:mac": "npm run build && electron-builder --mac",
-    "electron:build:linux": "npm run build && electron-builder --linux"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "electron:dev": "concurrently \"vite --mode electron\" \"wait-on http://localhost:5173 && electron .\"",
+  "build:electron": "vite build --mode electron",
+  "electron:build": "npm run build:electron && electron-builder",
+  "electron:build:win": "npm run build:electron && electron-builder --win",
+  "electron:build:mac": "npm run build:electron && electron-builder --mac",
+  "electron:build:linux": "npm run build:electron && electron-builder --linux"
+},
   "build": {
     "appId": "com.hive.app",
     "productName": "HIVE",
