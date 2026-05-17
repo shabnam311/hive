@@ -75,8 +75,7 @@ function createWindow() {
     mainWindow.loadURL("http://localhost:5173");
     mainWindow.webContents.openDevTools();
   } else {
-    // CRITICAL: use loadFile, not loadURL with file://
-    // loadFile correctly handles relative asset paths from the dist folder
+    // loadFile handles relative asset paths correctly for packaged apps
     const indexPath = path.join(app.getAppPath(), "dist", "index.html");
     mainWindow.loadFile(indexPath);
   }
