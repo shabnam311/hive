@@ -1,6 +1,6 @@
 // src/components/OllamaSetup.tsx
 import { useState } from "react";
-import { checkOllamaStatus } from "../services/ollama";
+import { checkOllamaHealth } from "../services/ollama";
 
 interface OllamaSetupProps {
   onRetry: () => void;
@@ -57,10 +57,14 @@ export function OllamaSetup({ onRetry, onDismiss }: OllamaSetupProps) {
   async function retry() {
     setChecking(true);
     setError(false);
-    const status = await checkOllamaStatus();
-    if (status.running) {
-      onRetry();
-    } else {
+    try {
+      const healthy = await checkOllamaHealth();
+      if (healthy) {
+        onRetry();
+      } else {
+        setError(true);
+      }
+    } catch {
       setError(true);
     }
     setChecking(false);
@@ -145,7 +149,12 @@ export function OllamaSetup({ onRetry, onDismiss }: OllamaSetupProps) {
         </div>
 
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-          <a href={info.downloadUrl} target="_blank" rel="noreferrer" style={{ color: "#c9a84c", fontSize: "0.85rem", textDecoration: "none", borderBottom: "1px solid rgba(201,168,76,0.3)", paddingBottom: "1px" }}>
+          
+            href={info.downloadUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: "#c9a84c", fontSize: "0.85rem", textDecoration: "none", borderBottom: "1px solid rgba(201,168,76,0.3)", paddingBottom: "1px" }}
+          >
             → Download from ollama.com
           </a>
         </div>
