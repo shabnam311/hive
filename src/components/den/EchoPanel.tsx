@@ -1,120 +1,266 @@
+// EchoPanel.tsx — Music corner of the Den
+// Spotify embed + personal listening log with mood tags
+
 import { useState } from "react";
 import { useDen } from "./DenContext";
 import "./den.css";
 
+const MOODS = ["3am", "studying", "cozy", "melancholic", "euphoric", "wandering", "focus", "nostalgic"];
+
+interface LoggedTrack {
+  id: string;
+  title: string;
+  artist: string;
+  mood: string;
+  note: string;
+  loggedAt: string;
+}
+
+function getEmbedUrl(url: string): string | null {
+  try {
+    if (url.includes("open.spotify.com")) {
+      const u = new URL(url);
+      return `https://open.spotify.com/embed${u.pathname}?utm_source=generator&theme=0`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function EchoPanel() {
   const { setActiveZone, spotifyPlaylistUrl, setSpotifyPlaylistUrl } = useDen();
+  const [tab, setTab] = useState<"player" | "log">("player");
   const [inputUrl, setInputUrl] = useState("");
+  const [urlError, setUrlError] = useState(false);
 
-  // Convert standard open.spotify.com link to embed format
-  const getEmbedUrl = (url: string) => {
-    try {
-      if (url.includes("open.spotify.com")) {
-        const urlObj = new URL(url);
-        // Extracts /playlist/1234 from https://open.spotify.com/playlist/1234
-        return `https://open.spotify.com/embed${urlObj.pathname}?utm_source=generator&theme=0`;
-      }
-      return url;
-    } catch {
-      return null;
-    }
+  // Log state (stored in component — persisted via DenContext ideally, local for now)
+  const [tracks, setTracks] = useState<LoggedTrack[]>(() => {
+    try { return JSON.parse(localStorage.getItem("hive.echo.log") ?? "[]"); } catch { return []; }
+  });
+  const [logForm, setLogForm] = useState({ title: "", artist: "", mood: "cozy", note: "" });
+  const [showLogForm, setShowLogForm] = useState(false);
+
+  const saveTrack = () => {
+    if (!logForm.title.trim()) return;
+    const entry: LoggedTrack = {
+      id: Math.random().toString(36).slice(2),
+      ...logForm,
+      loggedAt: new Date().toISOString(),
+    };
+    const next = [entry, ...tracks].slice(0, 100);
+    setTracks(next);
+    localStorage.setItem("hive.echo.log", JSON.stringify(next));
+    setLogForm({ title: "", artist: "", mood: "cozy", note: "" });
+    setShowLogForm(false);
   };
 
-  const handleSave = () => {
-    const embedUrl = getEmbedUrl(inputUrl);
-    if (embedUrl) {
-      setSpotifyPlaylistUrl(embedUrl);
-      setInputUrl("");
-    } else {
-      alert("Please paste a valid Spotify link (e.g. https://open.spotify.com/playlist/...)");
-    }
+  const removeTrack = (id: string) => {
+    const next = tracks.filter((t) => t.id !== id);
+    setTracks(next);
+    localStorage.setItem("hive.echo.log", JSON.stringify(next));
+  };
+
+  const handleSaveUrl = () => {
+    const embed = getEmbedUrl(inputUrl.trim());
+    if (!embed) { setUrlError(true); return; }
+    setSpotifyPlaylistUrl(embed);
+    setInputUrl("");
+    setUrlError(false);
   };
 
   return (
     <div className="den-panel den-panel--echo">
       <div className="den-panel-header">
         <span className="den-panel-zone-label">ECHO</span>
-        <button className="den-panel-close" onClick={() => setActiveZone(null)}>
-          ✕
-        </button>
+        <button className="den-panel-close" onClick={() => setActiveZone(null)}>✕</button>
       </div>
+
       <div className="den-panel-body">
-        {!spotifyPlaylistUrl ? (
-          <div className="den-empty" style={{ paddingTop: "3rem", paddingBottom: "3rem" }}>
-            <div style={{ fontSize: "48px", marginBottom: "1.5rem", opacity: 0.3 }}>♫</div>
-            <div className="den-empty-text">silence is a room waiting to be filled.</div>
-
-            <div
-              style={{
-                marginTop: "2rem",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
+        {/* Tabs */}
+        <div className="den-tabs" style={{ marginBottom: "1rem" }}>
+          {(["player", "log"] as const).map((t) => (
+            <button
+              key={t}
+              className={`den-tab ${tab === t ? "den-tab--active" : ""}`}
+              onClick={() => setTab(t)}
             >
-              <input
-                className="den-input"
-                placeholder="Paste Spotify Playlist Link here..."
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-              />
+              {t === "player" ? "♫ Player" : "📖 Log"}
+            </button>
+          ))}
+        </div>
+
+        {/* ── PLAYER TAB ── */}
+        {tab === "player" && (
+          <>
+            {spotifyPlaylistUrl ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <iframe
+                  src={spotifyPlaylistUrl}
+                  width="100%"
+                  height="380"
+                  frameBorder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  style={{ borderRadius: "12px", border: "1px solid rgba(201,168,76,0.15)" }}
+                />
+                <button
+                  className="den-btn"
+                  onClick={() => setSpotifyPlaylistUrl(null)}
+                  style={{ alignSelf: "center", fontSize: "0.72rem", opacity: 0.5 }}
+                >
+                  change playlist
+                </button>
+              </div>
+            ) : (
+              <div className="den-empty" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
+                <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.25 }}>♫</div>
+                <div className="den-empty-text" style={{ marginBottom: "1.5rem" }}>
+                  silence is a room waiting to be filled.
+                </div>
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <input
+                    className="den-input"
+                    placeholder="paste a Spotify playlist / album / track link…"
+                    value={inputUrl}
+                    onChange={(e) => { setInputUrl(e.target.value); setUrlError(false); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveUrl()}
+                    style={{ borderColor: urlError ? "#c0392b" : undefined }}
+                  />
+                  {urlError && (
+                    <span style={{ fontSize: "0.75rem", color: "#c0392b", fontStyle: "italic" }}>
+                      paste a link from open.spotify.com
+                    </span>
+                  )}
+                  <button className="den-btn den-btn--primary" onClick={handleSaveUrl}>
+                    tune in
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── LOG TAB ── */}
+        {tab === "log" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {/* Add track button */}
+            {!showLogForm ? (
               <button
-                className="den-btn"
-                style={{ padding: "10px 28px", fontSize: "10px" }}
-                onClick={handleSave}
-                disabled={!inputUrl}
+                className="den-btn den-btn--primary"
+                onClick={() => setShowLogForm(true)}
+                style={{ alignSelf: "flex-start" }}
               >
-                Set Soundtrack
+                + log what you're listening to
               </button>
-            </div>
+            ) : (
+              <div className="den-card" style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                <input
+                  className="den-input"
+                  placeholder="track / album title *"
+                  value={logForm.title}
+                  onChange={(e) => setLogForm({ ...logForm, title: e.target.value })}
+                />
+                <input
+                  className="den-input"
+                  placeholder="artist"
+                  value={logForm.artist}
+                  onChange={(e) => setLogForm({ ...logForm, artist: e.target.value })}
+                />
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                  {MOODS.map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setLogForm({ ...logForm, mood: m })}
+                      style={{
+                        padding: "0.2rem 0.6rem",
+                        borderRadius: "20px",
+                        border: "1px solid",
+                        borderColor: logForm.mood === m ? "#c9a84c" : "rgba(201,168,76,0.2)",
+                        background: logForm.mood === m ? "rgba(201,168,76,0.15)" : "transparent",
+                        color: logForm.mood === m ? "#c9a84c" : "rgba(244,228,193,0.45)",
+                        fontSize: "0.72rem",
+                        cursor: "pointer",
+                        fontFamily: "'Cinzel', serif",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  className="den-textarea"
+                  placeholder="a note (optional)…"
+                  rows={2}
+                  value={logForm.note}
+                  onChange={(e) => setLogForm({ ...logForm, note: e.target.value })}
+                />
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button className="den-btn den-btn--primary" onClick={saveTrack} style={{ flex: 1 }}>
+                    save
+                  </button>
+                  <button className="den-btn" onClick={() => setShowLogForm(false)}>
+                    cancel
+                  </button>
+                </div>
+              </div>
+            )}
 
-            {/* Decorative record player SVG */}
-            <div style={{ marginTop: "3rem", opacity: 0.15 }}>
-              <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-                <circle cx="60" cy="60" r="50" stroke="#c9a84c" strokeWidth="1" />
-                <circle cx="60" cy="60" r="40" stroke="#c9a84c" strokeWidth="0.5" />
-                <circle cx="60" cy="60" r="30" stroke="#c9a84c" strokeWidth="0.5" />
-                <circle cx="60" cy="60" r="15" fill="#c9a84c" fillOpacity="0.3" />
-                <circle cx="60" cy="60" r="5" fill="#c9a84c" fillOpacity="0.6" />
-                <line x1="60" y1="15" x2="85" y2="10" stroke="#c9a84c" strokeWidth="1" />
-              </svg>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-            <div
-              style={{
-                fontFamily: "'Cinzel', serif",
-                fontSize: "10px",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase" as const,
-                color: "var(--den-text-dim)",
-                marginBottom: "0.8rem",
-              }}
-            >
-              Current Soundtrack
-            </div>
-
-            <iframe
-              src={spotifyPlaylistUrl}
-              width="100%"
-              height="352"
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ borderRadius: "12px", border: "1px solid rgba(200, 150, 50, 0.2)" }}
-            ></iframe>
-
-            <div style={{ marginTop: "auto", paddingTop: "2rem", textAlign: "center" }}>
-              <button
-                className="den-btn den-btn--danger"
-                onClick={() => setSpotifyPlaylistUrl(null)}
-                style={{ fontSize: "10px" }}
-              >
-                Remove Playlist
-              </button>
-            </div>
+            {/* Track list */}
+            {tracks.length === 0 ? (
+              <div className="den-empty" style={{ paddingTop: "1.5rem" }}>
+                <div className="den-empty-text">
+                  your listening log is empty.<br />
+                  start logging what moves you.
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", maxHeight: "340px", overflowY: "auto" }}>
+                {tracks.map((t) => (
+                  <div key={t.id} className="den-card" style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", padding: "0.6rem 0.75rem" }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <span style={{ fontFamily: "'Cinzel', serif", fontSize: "0.82rem", color: "#f4e4c1" }}>
+                          {t.title}
+                        </span>
+                        {t.artist && (
+                          <span style={{ fontSize: "0.75rem", color: "rgba(244,228,193,0.45)", fontStyle: "italic" }}>
+                            — {t.artist}
+                          </span>
+                        )}
+                        <span style={{
+                          padding: "0.1rem 0.5rem",
+                          borderRadius: "20px",
+                          border: "1px solid rgba(201,168,76,0.25)",
+                          color: "rgba(201,168,76,0.7)",
+                          fontSize: "0.65rem",
+                          fontFamily: "'Cinzel', serif",
+                          letterSpacing: "0.06em",
+                        }}>
+                          {t.mood}
+                        </span>
+                      </div>
+                      {t.note && (
+                        <div style={{ fontSize: "0.78rem", color: "rgba(244,228,193,0.4)", fontStyle: "italic", marginTop: "0.2rem" }}>
+                          "{t.note}"
+                        </div>
+                      )}
+                      <div style={{ fontSize: "0.65rem", color: "rgba(244,228,193,0.25)", marginTop: "0.2rem" }}>
+                        {new Date(t.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    </div>
+                    <button
+                      className="den-btn"
+                      onClick={() => removeTrack(t.id)}
+                      style={{ fontSize: "0.65rem", padding: "2px 6px", opacity: 0.4, flexShrink: 0 }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

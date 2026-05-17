@@ -1,5 +1,6 @@
 {
   "name": "hive",
+  "author": "Shabnam",
   "version": "1.0.0",
   "description": "HIVE — your personal local-first workspace",
   "main": "electron/main.js",

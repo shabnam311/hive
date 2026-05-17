@@ -230,8 +230,7 @@ function FinPage() {
               <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 Ink It In
               </span>
-              {/* Pressed ink texture hover effect */}
-              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-0 group-hover:opacity-20 mix-blend-overlay transition-opacity"></div>
+        
             </button>
           </section>
 
