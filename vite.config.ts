@@ -5,6 +5,7 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  base: "./",
   plugins: [
     TanStackRouterVite({ routesDirectory: "./src/routes", generatedRouteTree: "./src/routeTree.gen.ts" }),
     react(),
@@ -13,20 +14,7 @@ export default defineConfig({
   ],
   resolve: { alias: { "@": "/src" } },
   server: { port: 5173, host: true },
-  build: { 
-    outDir: "dist", 
-    sourcemap: false,
-    chunkSizeWarningLimit: 2000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          three: ["three", "@react-three/fiber", "@react-three/drei"],
-          react: ["react", "react-dom"],
-          motion: ["framer-motion"],
-        }
-      }
-    }
-  },
+  build: { outDir: "dist", sourcemap: false },
   optimizeDeps: {
     exclude: ["hls.js", "three-stdlib"],
   },
