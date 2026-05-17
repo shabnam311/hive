@@ -12,7 +12,7 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   resolve: { alias: { "@": "/src" } },
-  base: "./",
+  base: "/hive/",
   server: { port: 5173, host: true },
   build: { outDir: "dist", sourcemap: false },
   optimizeDeps: {
