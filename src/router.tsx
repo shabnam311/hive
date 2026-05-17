@@ -1,4 +1,4 @@
-import { createRouter, useRouter } from "@tanstack/react-router";
+import { createRouter, useRouter, createHashHistory, createMemoryHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
@@ -55,10 +55,17 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 }
 
 export const getRouter = () => {
+  // Use hash history for Electron (file:// protocol), browser history for web
+  const isElectron = typeof window !== "undefined" &&
+    window.navigator.userAgent.toLowerCase().includes("electron");
+
+  const history = isElectron ? createHashHistory() : undefined;
+
   const router = createRouter({
     routeTree,
+    history,
     context: {},
-    scrollRestoration: true,
+    scrollRestoration: !isElectron,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
   });
