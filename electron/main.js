@@ -60,6 +60,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: "HIVE",
+    icon: path.join(__dirname, "..", "public", "icon.ico"),
     backgroundColor: "#0d0903",
     show: false,
     webPreferences: {
