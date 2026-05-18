@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, useNavigate } from "@tanstack/react-router";
 import { OllamaProvider, useOllama } from "@/components/OllamaContext";
 import { OllamaSetup } from "@/components/OllamaSetup";
 import { DenProvider, useDen } from "@/components/den/DenContext";
@@ -57,26 +57,19 @@ function MiniPlayer() {
 
 function AppShell() {
   const { showSetup, retry, dismiss } = useOllama();
+  const navigate = useNavigate();
+
+  function handleDismiss() {
+    dismiss();
+    navigate({ to: "/" });
+  }
+
   return (
     <>
-      {showSetup && <OllamaSetup onRetry={retry} onDismiss={dismiss} />}
+      {showSetup && <OllamaSetup onRetry={retry} onDismiss={handleDismiss} />}
       <Outlet />
       <MiniPlayer />
     </>
-  );
-}
-
-function NotFoundComponent() {
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0d0803", fontFamily: "'Cinzel', serif" }}>
-      <div style={{ textAlign: "center", color: "#f4e4c1" }}>
-        <h1 style={{ fontSize: "5rem", margin: 0, color: "#c9a84c", opacity: 0.4 }}>404</h1>
-        <p style={{ color: "rgba(244,228,193,0.4)", marginBottom: "2rem", fontFamily: "'Crimson Text', serif" }}>this page doesn't exist in the grimoire.</p>
-        <Link to="/" style={{ color: "#c9a84c", textDecoration: "none", border: "1px solid rgba(201,168,76,0.3)", padding: "0.6rem 1.5rem", borderRadius: "8px", fontSize: "0.8rem", letterSpacing: "0.1em" }}>
-          RETURN HOME
-        </Link>
-      </div>
-    </div>
   );
 }
 
@@ -88,5 +81,4 @@ export const Route = createRootRoute({
       </DenProvider>
     </OllamaProvider>
   ),
-  notFoundComponent: NotFoundComponent,
 });
