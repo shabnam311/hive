@@ -4,7 +4,7 @@
 
 **A local-first personal workspace — Diary, Planner, Finance, Library, Den, and AI — all running entirely on your machine.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-shabnam311.github.io%2Fhive-c9a84c?style=flat-square&logo=github)](https://shabnam311.github.io/hive/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-shabnam311.github.io%2Fhive-c9a84c?style=flat-square&logo=github)](https://acefare.github.io/hive/)
 [![License](https://img.shields.io/badge/license-MIT-c9a84c?style=flat-square)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-96%25-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Built with Vite](https://img.shields.io/badge/Built%20with-Vite-646cff?style=flat-square&logo=vite)](https://vitejs.dev/)
@@ -32,7 +32,7 @@
 - 🔒 **Fully local** — all data stored in IndexedDB, nothing leaves your device
 - 🦙 **AI powered by [Ollama](https://ollama.com/)** — runs any local model (llama3, mistral, etc.)
 - 🖥️ **Desktop app** — available as a native Electron app for Windows, Mac, and Linux
-- 🌐 **Web app** — try it instantly at [shabnam311.github.io/hive](https://shabnam311.github.io/hive/) (AI requires local Ollama)
+- 🌐 **Web app** — try it instantly at [shabnam311.github.io/hive](https://acefare.github.io/hive/) (AI requires local Ollama)
 
 ---
 
@@ -40,7 +40,7 @@
 
 ### Web (no install)
 
-Visit **[shabnam311.github.io/hive](https://shabnam311.github.io/hive/)** — all features except AI work immediately in your browser. To enable AI, install Ollama locally (see below).
+Visit **[acefare.github.io/hive](https://acefare.github.io/hive/)** — all features except AI work immediately in your browser. To enable AI, install Ollama locally (see below).
 
 ### Local Development
 
@@ -128,7 +128,7 @@ hive/
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to open an [issue](https://github.com/shabnam311/hive/issues) or submit a pull request.
+Contributions, issues, and feature requests are welcome! Feel free to open an [issue](https://github.com/acefare/hive/issues) or submit a pull request.
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feat/your-feature`
@@ -140,7 +140,7 @@ Contributions, issues, and feature requests are welcome! Feel free to open an [i
 
 ## 📄 License
 
-MIT © [shabnam311](https://github.com/shabnam311)
+MIT © [shabnam311](https://github.com/acefare)
 
 ---
 
