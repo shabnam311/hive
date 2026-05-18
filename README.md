@@ -140,7 +140,7 @@ Contributions, issues, and feature requests are welcome! Feel free to open an [i
 
 ## 📄 License
 
-MIT © [shabnam311](https://shabnam311.com/acefare)
+MIT © [shabnam311](https://shabnam311.com)
 
 ---
 
