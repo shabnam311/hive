@@ -31,7 +31,7 @@ export function EchoPanel() {
   const [tab, setTab] = useState<"player" | "log">("player");
   const [inputUrl, setInputUrl] = useState("");
   const [urlError, setUrlError] = useState(false);
-  const [showChangeInput, setShowChangeInput] = useState(false);
+  const [changingPlaylist, setChangingPlaylist] = useState(false);
 
   const [tracks, setTracks] = useState<LoggedTrack[]>(() => {
     try { return JSON.parse(localStorage.getItem("hive.echo.log") ?? "[]"); } catch { return []; }
@@ -65,7 +65,7 @@ export function EchoPanel() {
     setSpotifyPlaylistUrl(embed);
     setInputUrl("");
     setUrlError(false);
-    setShowChangeInput(false);
+    setChangingPlaylist(false);
   };
 
   return (
@@ -78,11 +78,7 @@ export function EchoPanel() {
       <div className="den-panel-body">
         <div className="den-tabs" style={{ marginBottom: "1rem" }}>
           {(["player", "log"] as const).map((t) => (
-            <button
-              key={t}
-              className={`den-tab ${tab === t ? "den-tab--active" : ""}`}
-              onClick={() => setTab(t)}
-            >
+            <button key={t} className={`den-tab ${tab === t ? "den-tab--active" : ""}`} onClick={() => setTab(t)}>
               {t === "player" ? "♫ Player" : "📖 Log"}
             </button>
           ))}
@@ -90,56 +86,43 @@ export function EchoPanel() {
 
         {tab === "player" && (
           <>
-            {spotifyPlaylistUrl ? (
+            {spotifyPlaylistUrl && !changingPlaylist ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <iframe
                   src={spotifyPlaylistUrl}
-                  width="100%"
-                  height="380"
-                  frameBorder="0"
+                  width="100%" height="380" frameBorder="0"
                   allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   loading="lazy"
                   style={{ borderRadius: "12px", border: "1px solid rgba(201,168,76,0.15)" }}
                 />
-                {!showChangeInput ? (
-                  <button
-                    className="den-btn"
-                    onClick={() => setShowChangeInput(true)}
-                    style={{ alignSelf: "center", fontSize: "0.72rem", opacity: 0.5 }}
-                  >
-                    change playlist
-                  </button>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <input
-                      className="den-input"
-                      placeholder="paste new Spotify link…"
-                      value={inputUrl}
-                      onChange={(e) => { setInputUrl(e.target.value); setUrlError(false); }}
-                      onKeyDown={(e) => e.key === "Enter" && handleSaveUrl()}
-                      style={{ borderColor: urlError ? "#c0392b" : undefined }}
-                    />
-                    {urlError && (
-                      <span style={{ fontSize: "0.75rem", color: "#c0392b", fontStyle: "italic" }}>
-                        paste a link from open.spotify.com
-                      </span>
-                    )}
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <button className="den-btn den-btn--primary" onClick={handleSaveUrl} style={{ flex: 1 }}>
-                        tune in
-                      </button>
-                      <button className="den-btn" onClick={() => { setShowChangeInput(false); setUrlError(false); }}>
-                        cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <button
+                  className="den-btn"
+                  onClick={() => setChangingPlaylist(true)}
+                  style={{ alignSelf: "center", fontSize: "0.72rem", opacity: 0.5 }}
+                >
+                  change playlist
+                </button>
               </div>
             ) : (
-              <div className="den-empty" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.25 }}>♫</div>
+              <div className="den-empty" style={{ paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
+                {/* Show mini preview of current playlist while changing */}
+                {spotifyPlaylistUrl && changingPlaylist && (
+                  <div style={{ width: "100%", marginBottom: "1rem" }}>
+                    <iframe
+                      src={spotifyPlaylistUrl}
+                      width="100%" height="80" frameBorder="0"
+                      style={{ borderRadius: "8px", border: "1px solid rgba(201,168,76,0.1)", opacity: 0.5, pointerEvents: "none", display: "block" }}
+                    />
+                    <p style={{ fontSize: "0.7rem", color: "rgba(244,228,193,0.35)", textAlign: "center", marginTop: "0.3rem", fontStyle: "italic" }}>
+                      ♫ still playing — paste new link below
+                    </p>
+                  </div>
+                )}
+                {!spotifyPlaylistUrl && (
+                  <div style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.25 }}>♫</div>
+                )}
                 <div className="den-empty-text" style={{ marginBottom: "1.5rem" }}>
-                  silence is a room waiting to be filled.
+                  {spotifyPlaylistUrl ? "paste a new playlist link" : "silence is a room waiting to be filled."}
                 </div>
                 <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <input
@@ -149,15 +132,23 @@ export function EchoPanel() {
                     onChange={(e) => { setInputUrl(e.target.value); setUrlError(false); }}
                     onKeyDown={(e) => e.key === "Enter" && handleSaveUrl()}
                     style={{ borderColor: urlError ? "#c0392b" : undefined }}
+                    autoFocus
                   />
                   {urlError && (
                     <span style={{ fontSize: "0.75rem", color: "#c0392b", fontStyle: "italic" }}>
                       paste a link from open.spotify.com
                     </span>
                   )}
-                  <button className="den-btn den-btn--primary" onClick={handleSaveUrl}>
-                    tune in
-                  </button>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button className="den-btn den-btn--primary" onClick={handleSaveUrl} style={{ flex: 1 }}>
+                      tune in
+                    </button>
+                    {changingPlaylist && (
+                      <button className="den-btn" onClick={() => { setChangingPlaylist(false); setInputUrl(""); setUrlError(false); }}>
+                        cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -167,58 +158,27 @@ export function EchoPanel() {
         {tab === "log" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {!showLogForm ? (
-              <button
-                className="den-btn den-btn--primary"
-                onClick={() => setShowLogForm(true)}
-                style={{ alignSelf: "flex-start" }}
-              >
+              <button className="den-btn den-btn--primary" onClick={() => setShowLogForm(true)} style={{ alignSelf: "flex-start" }}>
                 + log what you're listening to
               </button>
             ) : (
               <div className="den-card" style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                <input
-                  className="den-input"
-                  placeholder="track / album title *"
-                  value={logForm.title}
-                  onChange={(e) => setLogForm({ ...logForm, title: e.target.value })}
-                />
-                <input
-                  className="den-input"
-                  placeholder="artist"
-                  value={logForm.artist}
-                  onChange={(e) => setLogForm({ ...logForm, artist: e.target.value })}
-                />
+                <input className="den-input" placeholder="track / album title *" value={logForm.title} onChange={(e) => setLogForm({ ...logForm, title: e.target.value })} />
+                <input className="den-input" placeholder="artist" value={logForm.artist} onChange={(e) => setLogForm({ ...logForm, artist: e.target.value })} />
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
                   {MOODS.map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setLogForm({ ...logForm, mood: m })}
-                      style={{
-                        padding: "0.2rem 0.6rem", borderRadius: "20px", border: "1px solid",
-                        borderColor: logForm.mood === m ? "#c9a84c" : "rgba(201,168,76,0.2)",
-                        background: logForm.mood === m ? "rgba(201,168,76,0.15)" : "transparent",
-                        color: logForm.mood === m ? "#c9a84c" : "rgba(244,228,193,0.45)",
-                        fontSize: "0.72rem", cursor: "pointer", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em",
-                      }}
-                    >
+                    <button key={m} onClick={() => setLogForm({ ...logForm, mood: m })} style={{ padding: "0.2rem 0.6rem", borderRadius: "20px", border: "1px solid", borderColor: logForm.mood === m ? "#c9a84c" : "rgba(201,168,76,0.2)", background: logForm.mood === m ? "rgba(201,168,76,0.15)" : "transparent", color: logForm.mood === m ? "#c9a84c" : "rgba(244,228,193,0.45)", fontSize: "0.72rem", cursor: "pointer", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>
                       {m}
                     </button>
                   ))}
                 </div>
-                <textarea
-                  className="den-textarea"
-                  placeholder="a note (optional)…"
-                  rows={2}
-                  value={logForm.note}
-                  onChange={(e) => setLogForm({ ...logForm, note: e.target.value })}
-                />
+                <textarea className="den-textarea" placeholder="a note (optional)…" rows={2} value={logForm.note} onChange={(e) => setLogForm({ ...logForm, note: e.target.value })} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button className="den-btn den-btn--primary" onClick={saveTrack} style={{ flex: 1 }}>save</button>
                   <button className="den-btn" onClick={() => setShowLogForm(false)}>cancel</button>
                 </div>
               </div>
             )}
-
             {tracks.length === 0 ? (
               <div className="den-empty" style={{ paddingTop: "1.5rem" }}>
                 <div className="den-empty-text">your listening log is empty.<br />start logging what moves you.</div>
@@ -234,9 +194,7 @@ export function EchoPanel() {
                         <span style={{ padding: "0.1rem 0.5rem", borderRadius: "20px", border: "1px solid rgba(201,168,76,0.25)", color: "rgba(201,168,76,0.7)", fontSize: "0.65rem", fontFamily: "'Cinzel', serif", letterSpacing: "0.06em" }}>{t.mood}</span>
                       </div>
                       {t.note && <div style={{ fontSize: "0.78rem", color: "rgba(244,228,193,0.4)", fontStyle: "italic", marginTop: "0.2rem" }}>"{t.note}"</div>}
-                      <div style={{ fontSize: "0.65rem", color: "rgba(244,228,193,0.25)", marginTop: "0.2rem" }}>
-                        {new Date(t.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </div>
+                      <div style={{ fontSize: "0.65rem", color: "rgba(244,228,193,0.25)", marginTop: "0.2rem" }}>{new Date(t.loggedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
                     <button className="den-btn" onClick={() => removeTrack(t.id)} style={{ fontSize: "0.65rem", padding: "2px 6px", opacity: 0.4, flexShrink: 0 }}>✕</button>
                   </div>

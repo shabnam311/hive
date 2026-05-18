@@ -2,23 +2,55 @@ import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 import { OllamaProvider, useOllama } from "@/components/OllamaContext";
 import { OllamaSetup } from "@/components/OllamaSetup";
 import { DenProvider, useDen } from "@/components/den/DenContext";
+import { useState } from "react";
 
 function MiniPlayer() {
-  const { spotifyPlaylistUrl } = useDen();
+  const { spotifyPlaylistUrl, setSpotifyPlaylistUrl } = useDen();
+  const [minimized, setMinimized] = useState(false);
   if (!spotifyPlaylistUrl) return null;
   return (
     <div style={{
       position: "fixed", bottom: 16, right: 16, zIndex: 9000,
-      width: 320, borderRadius: "12px", overflow: "hidden",
+      width: minimized ? 160 : 320,
+      borderRadius: "12px", overflow: "hidden",
       boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
-      border: "1px solid rgba(201,168,76,0.2)", background: "#000",
+      border: "1px solid rgba(201,168,76,0.2)",
+      background: "#0d0803",
+      transition: "width 0.2s ease",
     }}>
-      <iframe
-        src={spotifyPlaylistUrl}
-        width="320" height="80" frameBorder="0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        style={{ display: "block" }}
-      />
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "5px 10px", background: "rgba(20,12,4,0.98)",
+        borderBottom: "1px solid rgba(201,168,76,0.1)",
+      }}>
+        <span style={{ fontFamily: "'Cinzel', serif", fontSize: "0.58rem", letterSpacing: "0.12em", color: "rgba(201,168,76,0.55)" }}>
+          ♫ ECHO
+        </span>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            onClick={() => setMinimized(!minimized)}
+            title={minimized ? "Expand" : "Minimize"}
+            style={{ background: "none", border: "none", color: "rgba(244,228,193,0.4)", cursor: "pointer", fontSize: "0.65rem", padding: "1px 3px", lineHeight: 1 }}
+          >
+            {minimized ? "▲" : "▼"}
+          </button>
+          <button
+            onClick={() => setSpotifyPlaylistUrl(null)}
+            title="Close player"
+            style={{ background: "none", border: "none", color: "rgba(244,228,193,0.3)", cursor: "pointer", fontSize: "0.65rem", padding: "1px 3px", lineHeight: 1 }}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+      {!minimized && (
+        <iframe
+          src={spotifyPlaylistUrl}
+          width="320" height="80" frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          style={{ display: "block" }}
+        />
+      )}
     </div>
   );
 }
@@ -36,15 +68,13 @@ function AppShell() {
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold">404</h1>
-        <p className="mt-2 text-sm">Page not found.</p>
-        <div className="mt-6">
-          <Link to="/" className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium">
-            Go home
-          </Link>
-        </div>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0d0803", fontFamily: "'Cinzel', serif" }}>
+      <div style={{ textAlign: "center", color: "#f4e4c1" }}>
+        <h1 style={{ fontSize: "5rem", margin: 0, color: "#c9a84c", opacity: 0.4 }}>404</h1>
+        <p style={{ color: "rgba(244,228,193,0.4)", marginBottom: "2rem", fontFamily: "'Crimson Text', serif" }}>this page doesn't exist in the grimoire.</p>
+        <Link to="/" style={{ color: "#c9a84c", textDecoration: "none", border: "1px solid rgba(201,168,76,0.3)", padding: "0.6rem 1.5rem", borderRadius: "8px", fontSize: "0.8rem", letterSpacing: "0.1em" }}>
+          RETURN HOME
+        </Link>
       </div>
     </div>
   );

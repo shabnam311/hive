@@ -1,4 +1,3 @@
-// src/components/OllamaSetup.tsx
 import { useState } from "react";
 import { checkOllamaHealth } from "../services/ollama";
 
@@ -32,7 +31,7 @@ const instructions: Record<OS, { steps: string[]; downloadUrl: string; command: 
     command: "ollama pull llama3",
     steps: [
       "Download and open the Ollama .dmg file",
-      "Drag Ollama to Applications and open it — it runs in the menu bar",
+      "Drag Ollama to Applications and open it",
       "Open Terminal and run the command below",
       "Come back here and click Retry",
     ],
@@ -71,30 +70,20 @@ export function OllamaSetup({ onRetry, onDismiss }: OllamaSetupProps) {
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(4,2,1,0.92)",
-        backdropFilter: "blur(12px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        fontFamily: "var(--font-body, 'Crimson Text', serif)",
-      }}
-    >
-      <div
-        style={{
-          background: "linear-gradient(160deg, #1a1005 0%, #0d0803 100%)",
-          border: "1px solid #2a1a08",
-          borderRadius: "16px",
-          padding: "2.5rem",
-          maxWidth: "520px",
-          width: "90%",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.8)",
-        }}
-      >
+    <div style={{
+      position: "fixed", inset: 0,
+      background: "rgba(4,2,1,0.92)",
+      backdropFilter: "blur(12px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 9999,
+      fontFamily: "var(--font-body, 'Crimson Text', serif)",
+    }}>
+      <div style={{
+        background: "linear-gradient(160deg, #1a1005 0%, #0d0803 100%)",
+        border: "1px solid #2a1a08", borderRadius: "16px",
+        padding: "2.5rem", maxWidth: "520px", width: "90%",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.8)",
+      }}>
         <div style={{ marginBottom: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
             <span style={{ fontSize: "1.5rem" }}>🦙</span>
@@ -109,31 +98,21 @@ export function OllamaSetup({ onRetry, onDismiss }: OllamaSetupProps) {
 
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
           {(["windows", "mac", "linux"] as OS[]).map((o) => (
-            <button
-              key={o}
-              onClick={() => setOs(o)}
-              style={{
-                padding: "0.35rem 0.9rem",
-                borderRadius: "6px",
-                border: "1px solid",
-                borderColor: os === o ? "#c9a84c" : "#2a1a08",
-                background: os === o ? "rgba(201,168,76,0.12)" : "transparent",
-                color: os === o ? "#c9a84c" : "#705030",
-                fontSize: "0.78rem",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-                fontFamily: "var(--font-display, 'Cinzel', serif)",
-              }}
-            >
-              {o === "windows" ? "WINDOWS" : o === "mac" ? "MAC" : "LINUX"}
+            <button key={o} onClick={() => setOs(o)} style={{
+              padding: "0.35rem 0.9rem", borderRadius: "6px", border: "1px solid",
+              borderColor: os === o ? "#c9a84c" : "#2a1a08",
+              background: os === o ? "rgba(201,168,76,0.12)" : "transparent",
+              color: os === o ? "#c9a84c" : "#705030",
+              fontSize: "0.78rem", letterSpacing: "0.08em", cursor: "pointer",
+              fontFamily: "var(--font-display, 'Cinzel', serif)",
+            }}>
+              {o.toUpperCase()}
             </button>
           ))}
         </div>
 
         <ol style={{ margin: "0 0 1.25rem 0", padding: "0 0 0 1.2rem", color: "#c0a878", fontSize: "0.9rem", lineHeight: 2 }}>
-          {info.steps.map((step, i) => (
-            <li key={i}>{step}</li>
-          ))}
+          {info.steps.map((step, i) => <li key={i}>{step}</li>)}
         </ol>
 
         <div style={{ background: "#050302", border: "1px solid #1a1005", borderRadius: "8px", padding: "0.85rem 1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "1rem", justifyContent: "space-between" }}>
@@ -149,28 +128,28 @@ export function OllamaSetup({ onRetry, onDismiss }: OllamaSetupProps) {
         </div>
 
         <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-          
-            href={info.downloadUrl}
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: "#c9a84c", fontSize: "0.85rem", textDecoration: "none", borderBottom: "1px solid rgba(201,168,76,0.3)", paddingBottom: "1px" }}
-          >
+          <a href={info.downloadUrl} target="_blank" rel="noreferrer"
+            style={{ color: "#c9a84c", fontSize: "0.85rem", textDecoration: "none", borderBottom: "1px solid rgba(201,168,76,0.3)", paddingBottom: "1px" }}>
             → Download from ollama.com
           </a>
         </div>
 
         <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button
-            onClick={retry}
-            disabled={checking}
-            style={{ flex: 1, padding: "0.7rem", borderRadius: "8px", border: "1px solid #c9a84c", background: "rgba(201,168,76,0.1)", color: "#c9a84c", fontSize: "0.85rem", letterSpacing: "0.1em", cursor: checking ? "default" : "pointer", fontFamily: "var(--font-display, 'Cinzel', serif)" }}
-          >
+          <button onClick={retry} disabled={checking} style={{
+            flex: 1, padding: "0.7rem", borderRadius: "8px",
+            border: "1px solid #c9a84c", background: "rgba(201,168,76,0.1)",
+            color: "#c9a84c", fontSize: "0.85rem", letterSpacing: "0.1em",
+            cursor: checking ? "default" : "pointer",
+            fontFamily: "var(--font-display, 'Cinzel', serif)",
+          }}>
             {checking ? "CHECKING..." : "I'VE INSTALLED IT — RETRY"}
           </button>
-          <button
-            onClick={onDismiss}
-            style={{ padding: "0.7rem 1.2rem", borderRadius: "8px", border: "1px solid #2a1a08", background: "transparent", color: "#705030", fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-display, 'Cinzel', serif)" }}
-          >
+          <button onClick={onDismiss} style={{
+            padding: "0.7rem 1.2rem", borderRadius: "8px",
+            border: "1px solid #2a1a08", background: "transparent",
+            color: "#705030", fontSize: "0.85rem", cursor: "pointer",
+            fontFamily: "var(--font-display, 'Cinzel', serif)",
+          }}>
             SKIP
           </button>
         </div>
