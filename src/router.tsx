@@ -12,6 +12,7 @@ const history = isElectron ? createHashHistory() : createBrowserHistory();
 export const router = createRouter({
   routeTree,
   history,
+  basepath: import.meta.env.BASE_URL,
   defaultPreloadStaleTime: 0,
 });
 

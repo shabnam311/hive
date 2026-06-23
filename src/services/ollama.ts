@@ -54,20 +54,22 @@ export async function getAvailableModels(): Promise<OllamaModel[]> {
     });
     if (!res.ok) return [];
     const data = await res.json();
-    return (data.models ?? []).map((m: { name: string; size: number }) => ({
-      name: m.name,
-      displayName: m.name.split(":")[0],
-      sizeGB: Math.round((m.size / 1e9) * 10) / 10,
-    }));
+    return (data.models ?? [])
+      .filter((m: { name: string }) => !m.name.includes("moondream") && !m.name.includes("llava"))
+      .map((m: { name: string; size: number }) => ({
+        name: m.name,
+        displayName: m.name.split(":")[0],
+        sizeGB: Math.round((m.size / 1e9) * 10) / 10,
+      }));
   } catch {
     return [];
   }
 }
 
 export async function getBestModel(): Promise<string> {
-  const saved = localStorage.getItem(MODEL_KEY);
-  if (saved) return saved;
   const models = await getAvailableModels();
+  const saved = localStorage.getItem(MODEL_KEY);
+  if (saved && models.some((m) => m.name === saved)) return saved;
   if (models.length > 0) return models[0].name;
   return FALLBACK_MODEL;
 }
@@ -136,19 +138,37 @@ export async function* streamChat(
 
   const reader = res.body.getReader();
   const dec = new TextDecoder();
+  let buffer = "";
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    const chunk = dec.decode(value);
-    for (const line of chunk.split("\n")) {
+    buffer += dec.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    
+    for (const line of lines) {
       if (!line.trim()) continue;
       try {
         const j = JSON.parse(line);
+        if (j.error) {
+          console.error("Ollama stream error:", j.error);
+          yield `\n[Error: ${j.error}]`;
+        }
         const token: string = j.message?.content ?? "";
         if (token) yield token;
-      } catch {}
+      } catch (e) {
+        // ignore JSON parse errors for malformed lines
+      }
     }
+  }
+  
+  if (buffer.trim()) {
+    try {
+      const j = JSON.parse(buffer);
+      const token: string = j.message?.content ?? "";
+      if (token) yield token;
+    } catch {}
   }
 }
 

@@ -30,7 +30,25 @@ export function useDBList<T extends { id: string }>(
 
   useEffect(() => {
     if (skipPersist.current) return;
-    items.forEach((item) => dbPut(store, item).catch(console.warn));
+    (async () => {
+      try {
+        const existingItems = await dbGetAll<T>(store);
+        const currentIds = items.map(x => x.id);
+        for (const ex of existingItems) {
+          if (!currentIds.includes(ex.id)) {
+            // Delete removed items
+            const { dbDelete } = await import('@/lib/db');
+            await dbDelete(store, ex.id);
+          }
+        }
+        // Save/Update current items
+        for (const item of items) {
+          await dbPut(store, item);
+        }
+      } catch (err) {
+        console.warn("Error syncing db", err);
+      }
+    })();
     localStorage.setItem(localStorageKey, JSON.stringify(items));
   }, [items, store, localStorageKey]);
 
