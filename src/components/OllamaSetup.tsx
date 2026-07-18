@@ -18,7 +18,7 @@ function detectOS(): OS {
 const instructions: Record<OS, { steps: string[]; downloadUrl: string; command: string }> = {
   windows: {
     downloadUrl: "https://ollama.com/download/windows",
-    command: "ollama pull llama3",
+    command: "ollama pull qwen3:8b",
     steps: [
       "Download and run the Ollama installer (.exe)",
       "Ollama starts automatically in the system tray after install",
@@ -28,7 +28,7 @@ const instructions: Record<OS, { steps: string[]; downloadUrl: string; command: 
   },
   mac: {
     downloadUrl: "https://ollama.com/download/mac",
-    command: "ollama pull llama3",
+    command: "ollama pull qwen3:8b",
     steps: [
       "Download and open the Ollama .dmg file",
       "Drag Ollama to Applications and open it",
@@ -38,7 +38,7 @@ const instructions: Record<OS, { steps: string[]; downloadUrl: string; command: 
   },
   linux: {
     downloadUrl: "https://ollama.com",
-    command: "curl -fsSL https://ollama.com/install.sh | sh && ollama pull llama3",
+    command: "curl -fsSL https://ollama.com/install.sh | sh && ollama pull qwen3:8b",
     steps: [
       "Run the install command below in your terminal",
       "Ollama starts automatically as a service",

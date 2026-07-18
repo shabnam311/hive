@@ -30,7 +30,7 @@
 | **Realm** | Custom workspace for your projects | ✅ Ollama |
 
 - 🔒 **Fully local** — all data stored in IndexedDB, nothing leaves your device
-- 🦙 **AI powered by [Ollama](https://ollama.com/)** — runs any local model (llama3, mistral, etc.)
+- 🦙 **AI powered by [Ollama](https://ollama.com/)** — defaults to Qwen3 8B for capable local tutoring, while supporting other local models
 - 🖥️ **Desktop app** — available as a native Electron app for Windows, Mac, and Linux
 - 🌐 **Web app** — try it instantly at [shabnam311.github.io/hive](https://shabnam311.github.io/hive/) (AI requires local Ollama)
 
@@ -64,7 +64,7 @@ HIVE uses [Ollama](https://ollama.com/) to run AI models locally — no OpenAI k
 1. Download and install Ollama from [ollama.com/download](https://ollama.com/download)
 2. Pull a model:
    ```bash
-   ollama pull llama3
+   ollama pull qwen3:8b
    ```
 3. Ollama runs as a background service — HIVE detects it automatically.
 

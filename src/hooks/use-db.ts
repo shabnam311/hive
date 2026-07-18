@@ -1,6 +1,6 @@
 // use-db.ts — React hook for IndexedDB-backed state
 import { useCallback, useEffect, useRef, useState } from "react";
-import { dbGetAll, dbPut, getSetting, setSetting, STORES } from "@/lib/db";
+import { dbGetAll, dbPut, dbDelete, getSetting, setSetting, STORES } from "@/lib/db";
 
 type StoreName = (typeof STORES)[keyof typeof STORES];
 
@@ -37,7 +37,6 @@ export function useDBList<T extends { id: string }>(
         for (const ex of existingItems) {
           if (!currentIds.includes(ex.id)) {
             // Delete removed items
-            const { dbDelete } = await import('@/lib/db');
             await dbDelete(store, ex.id);
           }
         }

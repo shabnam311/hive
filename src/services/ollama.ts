@@ -3,7 +3,10 @@
 
 const BASE_URL = import.meta.env.VITE_OLLAMA_URL ?? "http://localhost:11434";
 const MODEL_KEY = "hive:ollama:model";
-const FALLBACK_MODEL = import.meta.env.VITE_OLLAMA_DEFAULT_MODEL ?? "llama3";
+// Qwen3 is the default tutor model: it is particularly capable at maths,
+// programming, and multi-step technical reasoning.
+const PREFERRED_MODEL = "qwen3:8b";
+const FALLBACK_MODEL = import.meta.env.VITE_OLLAMA_DEFAULT_MODEL ?? PREFERRED_MODEL;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +73,8 @@ export async function getBestModel(): Promise<string> {
   const models = await getAvailableModels();
   const saved = localStorage.getItem(MODEL_KEY);
   if (saved && models.some((m) => m.name === saved)) return saved;
+  const preferred = models.find((m) => m.name === PREFERRED_MODEL);
+  if (preferred) return preferred.name;
   if (models.length > 0) return models[0].name;
   return FALLBACK_MODEL;
 }

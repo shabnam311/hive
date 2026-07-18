@@ -48,7 +48,7 @@ export async function getBestModel(): Promise<string> {
   if (models.length === 0) return "";
   const names = models.map((m) => m.name);
   if (saved && names.includes(saved)) return saved;
-  const preferred = ["llama3", "llama3:latest", "mistral", "mistral:latest", "llama2"];
+  const preferred = ["qwen3:8b", "qwen3", "llama3", "llama3:latest", "mistral", "mistral:latest", "llama2"];
   for (const p of preferred) {
     const match = names.find((n) => n === p || n.startsWith(p.split(":")[0]));
     if (match) return match;
