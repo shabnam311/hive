@@ -7,8 +7,8 @@ const isElectron =
   (window.location.protocol === "file:" ||
     window.navigator.userAgent.toLowerCase().includes("electron"));
 
-const history = isElectron ? createHashHistory() : createBrowserHistory();
-
+// Use hash history everywhere so GitHub Pages doesn't 404 on direct links/refreshes
+const history = createHashHistory();
 export const router = createRouter({
   routeTree,
   history,
