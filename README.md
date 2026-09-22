@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-96%25-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Built with Vite](https://img.shields.io/badge/Built%20with-Vite-646cff?style=flat-square&logo=vite)](https://vitejs.dev/)
 
-> No cloud. No API keys. No tracking. Your data stays on your device — always.
+> No cloud. No API keys. No tracking. Your data stays on your device always.
 
 <!-- SCREENSHOT PLACEHOLDER -->
 <!-- ![HIVE Screenshot](docs/screenshot.png) -->
@@ -57,7 +57,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 🦙 AI Setup (Ollama)
+##  AI Setup (Ollama)
 
 HIVE uses [Ollama](https://ollama.com/) to run AI models locally — no OpenAI key, no subscriptions, no data sent anywhere.
 
